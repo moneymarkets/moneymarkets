@@ -888,8 +888,10 @@ export function RoutePicker({
                 <span>{instruction.etaSeconds} seconds after it confirms</span>
               </div>
               <p className="tiny muted" style={{ marginTop: 8 }}>
-                Sending a different amount is fine, and {railName(instruction.rail)} will price
-                it when it arrives. Nothing here can move money out of your account.
+                {instruction.rail === 'near'
+                  ? `Send the full amount. If less arrives, ${railName(instruction.rail)} does not swap it and returns it to the address it came from when the quote expires. If more arrives, the extra is returned.`
+                  : `Sending a different amount is fine, and ${railName(instruction.rail)} will price it when it arrives.`}{' '}
+                Nothing here can move money out of your account.
               </p>
 
               {/* Live, from the watcher's own row: seen on the source chain, then the

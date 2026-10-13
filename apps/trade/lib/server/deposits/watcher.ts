@@ -304,6 +304,30 @@ function refundScanDue(attempt: DepositAttemptRow): boolean {
   return somethingArrived && (attempt.stuckAt !== null || Date.now() - attempt.createdAt < 7 * 24 * 60 * 60 * 1000);
 }
 
+/** Refund hashes already recorded as a surplus return, so each is logged once. */
+const surplusSeen = new Set<string>();
+
+/** What the vendor says reached the deposit address, in the origin token's base units. */
+function depositedAmountOf(attempt: DepositAttemptRow): bigint | undefined {
+  if (!attempt.vendorRawJson) return undefined;
+  try {
+    const raw = JSON.parse(attempt.vendorRawJson) as { swapDetails?: { depositedAmount?: unknown } };
+    const v = raw.swapDetails?.depositedAmount;
+    return typeof v === 'string' && /^\d+$/.test(v) ? BigInt(v) : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+/**
+ * A return of less than 90% of what was deposited is the surplus, not the deposit: a
+ * full refund comes back whole, less a fee that is small beside it.
+ */
+export function isSurplusReturn(returned: bigint, deposited: bigint | undefined): boolean {
+  if (deposited === undefined || deposited <= 0n || returned <= 0n) return false;
+  return returned * 10n < deposited * 9n;
+}
+
 async function checkSourceRefund(attempt: DepositAttemptRow, now: number, force: boolean): Promise<void> {
   if (!refundScanDue(attempt)) return;
   const last = lastRefundScan.get(attempt.depositAddress) ?? 0;
@@ -314,6 +338,19 @@ async function checkSourceRefund(attempt: DepositAttemptRow, now: number, force:
     const check = await detectSourceRefund(attempt);
     if (check.status !== 'found') return;
     const { finding } = check;
+    // More was sent than the quote was for, and the vendor is returning the extra while
+    // it still works on the swap: that is not the deposit coming back. Unless the vendor
+    // itself has said REFUNDED, a return well short of what was deposited ends nothing.
+    if (attempt.terminalStatus !== 'REFUNDED' && isSurplusReturn(finding.amount, depositedAmountOf(attempt))) {
+      if (!surplusSeen.has(finding.hash)) {
+        surplusSeen.add(finding.hash);
+        db.recordEvent(attempt.depositAddress, 'SURPLUS_RETURNED', attempt.lastStatus, {
+          ...finding,
+          amount: finding.amount.toString(),
+        });
+      }
+      return;
+    }
     if (db.refundHashClaimedByOther(finding.hash, attempt.depositAddress)) {
       db.recordEvent(attempt.depositAddress, 'WATCHER_ERROR', null, {
         source: 'refund-detect',
@@ -862,7 +899,8 @@ function needsEnrichment(attempt: DepositAttemptRow): boolean {
   return attempt.terminalStatus === 'REFUNDED' && (!attempt.refundTxHash || attempt.refundReason === null);
 }
 
-async function checkOne(attempt: DepositAttemptRow): Promise<void> {
+async function checkOne(input: DepositAttemptRow): Promise<void> {
+  let attempt = input;
   const db = depositDb();
 
   // Arrival on the source chain is read in `checkSourceLanding`, for every rail.
@@ -882,6 +920,29 @@ async function checkOne(attempt: DepositAttemptRow): Promise<void> {
     const originHash = parsed.swapDetails?.originChainTxHashes?.[0]?.hash;
     if (originHash) {
       db.applySourceEvidence(attempt.depositAddress, { hash: originHash, source: 'vendor:near' });
+    }
+
+    // The vendor says delivered on a row this app ended as returned from its own chain
+    // read, and the vendor's numbers show the return was only the surplus: the row goes
+    // back in flight so the delivery below is accepted and then confirmed on Monad.
+    if (
+      status === 'SUCCESS' &&
+      attempt.terminalStatus === 'REFUNDED' &&
+      attempt.refundEvidenceHash &&
+      /^\d+$/.test(parsed.swapDetails?.refundedAmount ?? '') &&
+      /^\d+$/.test(parsed.swapDetails?.depositedAmount ?? '') &&
+      /^[1-9]\d*$/.test(parsed.swapDetails?.amountOut ?? '') &&
+      isSurplusReturn(BigInt(parsed.swapDetails!.refundedAmount!), BigInt(parsed.swapDetails!.depositedAmount!))
+    ) {
+      const revertedAt = Date.now();
+      if (db.revertSurplusRefund(attempt.depositAddress, revertedAt)) {
+        db.recordEvent(attempt.depositAddress, 'SURPLUS_RETURNED', status, {
+          hash: attempt.refundEvidenceHash,
+          amount: attempt.refundEvidenceAmount,
+          note: 'refund outcome withdrawn: the vendor reports delivery and a partial return',
+        }, revertedAt);
+        attempt = db.attempt(attempt.depositAddress) ?? attempt;
+      }
     }
 
     if (status === attempt.lastStatus && !terminal) return;

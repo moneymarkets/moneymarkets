@@ -236,8 +236,19 @@ export function DepositProgress({
   // A stuck deposit's own line and help button replace the step's slow message.
   const stuck = !state.terminal && rowIsStuck(row, Date.now());
 
+  const short = state.terminal ? undefined : shortfall(row);
+
   return (
     <div style={{ marginTop: 12, borderTop: '1px solid var(--line)', paddingTop: 10 }}>
+      {short ? (
+        <div style={{ marginBottom: 10 }}>
+          <Notice tone="warn">
+            Only {short.arrived} {row.originSymbol} of the {short.quoted} {row.originSymbol} this quote was for
+            has arrived, so the swap has not started. If the rest does not arrive before the quote expires,
+            the provider returns what arrived to the address it came from.
+          </Notice>
+        </div>
+      ) : null}
       <ol className="steps" style={{ listStyle: 'none', margin: 0, padding: 0 }}>
         {state.steps.map((step) => {
           const isTerminalStop = state.terminal && state.terminal.atStep === step.id;
@@ -369,6 +380,28 @@ export function DepositProgress({
       ) : null}
     </div>
   );
+}
+
+/**
+ * Less arrived than the quote was for. The provider's own status says so
+ * (`INCOMPLETE_DEPOSIT`) and its payload carries the amount it counted; without this the
+ * tracker read "Bridging to Monad" for an hour and then "Returned" (deposit of 2026-10-13:
+ * 0.00929 SOL against a 0.01 SOL quote).
+ */
+function shortfall(row: AttemptRow): { arrived: string; quoted: string } | undefined {
+  if (row.lastStatus !== 'INCOMPLETE_DEPOSIT' || !row.vendorRawJson) return undefined;
+  try {
+    const raw = JSON.parse(row.vendorRawJson) as { swapDetails?: { depositedAmount?: unknown } };
+    const deposited = raw.swapDetails?.depositedAmount;
+    if (typeof deposited !== 'string' || !/^\d+$/.test(deposited) || !/^\d+$/.test(row.amountIn)) return undefined;
+    if (BigInt(deposited) >= BigInt(row.amountIn)) return undefined;
+    return {
+      arrived: formatMoney(BigInt(deposited), row.originDecimals, row.originDecimals),
+      quoted: formatMoney(BigInt(row.amountIn), row.originDecimals, row.originDecimals),
+    };
+  } catch {
+    return undefined;
+  }
 }
 
 /**

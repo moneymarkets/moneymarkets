@@ -405,3 +405,35 @@ describe('the tracker rebuild evidence columns', () => {
     expect(row?.landsIn).toBe('margin');
   });
 });
+
+describe('a surplus returned before delivery (deposit 71ptCLdp, 2026-10-13)', () => {
+  const refund = { hash: 'RefundTx111', source: 'our-watcher-solana', amount: '8771942', from: 'VendorAcct111' };
+
+  it('goes back in flight, then ends delivered, once the vendor reports the delivery', () => {
+    const db = new DepositDb(':memory:');
+    const address = registered(db);
+    db.applyOneClickStatus(address, { status: 'PROCESSING', terminal: false });
+    expect(db.applyRefundEvidence(address, refund)).toBe(true);
+    expect(db.attempt(address)?.terminalStatus).toBe('REFUNDED');
+
+    expect(db.revertSurplusRefund(address)).toBe(true);
+    const open = db.attempt(address);
+    expect(open?.terminalStatus).toBeNull();
+    expect(open?.refundEvidenceHash).toBeNull();
+    expect(open?.refundTxHash).toBeNull();
+
+    db.applyOneClickStatus(address, { status: 'SUCCESS', terminal: true, amountOut: '1054412' });
+    expect(db.attempt(address)?.terminalStatus).toBe('SUCCESS');
+    expect(db.applyDestinationEvidence(address, { hash: '0xdelivered', block: '1', source: 'vendor-confirmed' })).toBe(true);
+    expect(db.attempt(address)?.destinationTxHash).toBe('0xdelivered');
+  });
+
+  it('leaves a refund the vendor itself reported alone', () => {
+    const db = new DepositDb(':memory:');
+    const address = registered(db);
+    db.applyOneClickStatus(address, { status: 'REFUNDED', terminal: true, refundAmount: '9194707' });
+    db.applyRefundEvidence(address, { ...refund, amount: '9194707' });
+    expect(db.revertSurplusRefund(address)).toBe(false);
+    expect(db.attempt(address)?.terminalStatus).toBe('REFUNDED');
+  });
+});

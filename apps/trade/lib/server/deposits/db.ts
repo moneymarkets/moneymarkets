@@ -29,6 +29,8 @@ export type DepositEventType =
   | 'DESTINATION_DETECTED'
   /** This app's own chain-confirmed proof that the money went back to the depositor. */
   | 'REFUND_DETECTED'
+  /** Money came back to the depositor that was only the extra beyond the quote; ends nothing. */
+  | 'SURPLUS_RETURNED'
   /** A row that went three times its quoted eta with no change, forced through a full re-check. */
   | 'SLOW_RECHECK'
   /** Found stuck (`@tradepro/core` `isStuck`), and each recovery call made for it. */
@@ -538,6 +540,43 @@ export class DepositDb {
         at,
         depositAddress,
       );
+    return Number(result.changes ?? 0) > 0;
+  }
+
+  /**
+   * Undo a REFUNDED outcome that came only from this app's own source-chain read, when
+   * the vendor has since said SUCCESS and its payload shows the return was the surplus.
+   *
+   * 2026-10-13, deposit `71ptCLdp…`: 0.0189 SOL was sent against a 0.01 SOL quote. The
+   * vendor returned the extra 0.0088 SOL first, the refund scan read that as the whole
+   * deposit coming back and ended the row, and the delivery of 1.054412 USDC four
+   * minutes later was never accepted. The row showed "Returned" for money that was in
+   * the wallet.
+   *
+   * Only a row whose vendor never said REFUNDED or FAILED is touched, and never one with
+   * a delivery already recorded. The return itself stays in the events table.
+   */
+  revertSurplusRefund(depositAddress: string, at = Date.now()): boolean {
+    const result = this.#db
+      .prepare(
+        `UPDATE deposit_attempts SET
+           terminal_status = NULL,
+           terminal_at = NULL,
+           refund_evidence_hash = NULL,
+           refund_evidence_source = NULL,
+           refund_evidence_amount = NULL,
+           refund_evidence_from = NULL,
+           refund_evidence_at = NULL,
+           refund_tx_hash = NULL,
+           refund_amount = NULL,
+           last_change_at = ?
+         WHERE deposit_address = ?
+           AND terminal_status = 'REFUNDED'
+           AND refund_evidence_hash IS NOT NULL
+           AND destination_tx_hash IS NULL
+           AND last_status NOT IN ('REFUNDED', 'FAILED')`,
+      )
+      .run(at, depositAddress);
     return Number(result.changes ?? 0) > 0;
   }
 
