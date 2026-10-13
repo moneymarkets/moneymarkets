@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { Button, Notice, Passkey, Sheet, type PasskeyState } from '@tradepro/ui';
 import { shouldOfferCrossDevice } from '@tradepro/core';
 import { PRF_UNAVAILABLE_MESSAGE, useSession } from '../lib/session';
+import { BASE_PATH } from '../lib/basePath';
 
 /**
  * `/` — onboard and sign in (spec §6.1, design §5.1).
@@ -89,7 +90,10 @@ export default function OnboardPage() {
 
   return (
     <main className="onboard">
-      <div className="wordmark">MoneyMarkets</div>
+      <div className="wordmark logo-img" role="img" aria-label="MoneyMarkets">
+        <img className="on-light" src={`${BASE_PATH}/logo.svg`} alt="" height={26} />
+        <img className="on-dark" src={`${BASE_PATH}/logo-on-dark.svg`} alt="" height={26} />
+      </div>
 
       <div>
         <h1>

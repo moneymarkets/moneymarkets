@@ -71,6 +71,9 @@ export interface AppShellProps {
   /** Trailing slice of `wordmark` to render in `--trade` (e.g. "Money**Markets**").
    *  Omit for a plain, single-colour wordmark. */
   wordmarkAccent?: string;
+  /** The logo as two images, one per theme. Shown instead of the text wordmark, which
+   *  stays as the images' accessible name. */
+  logo?: { light: string; dark: string };
   link?: LinkLike;
   /** Footer status, e.g. relayer/venue health (design §4). Rendered by the caller,
    *  typically at the end of `children`, wherever the page content puts it — kept
@@ -119,6 +122,7 @@ export function AppShell({
   pathname,
   wordmark,
   wordmarkAccent,
+  logo,
   link,
   status,
   mobileHeaderActions,
@@ -143,10 +147,17 @@ export function AppShell({
     <div className="shell">
       <header className="topbar fade-down">
         <div className="topbar-inner">
-          <span className="logo">
-            {wordmark.slice(0, accentStart)}
-            {accentStart < wordmark.length ? <span>{wordmark.slice(accentStart)}</span> : null}
-          </span>
+          {logo ? (
+            <span className="logo logo-img" role="img" aria-label={wordmark}>
+              <img className="on-light" src={logo.light} alt="" height={26} />
+              <img className="on-dark" src={logo.dark} alt="" height={26} />
+            </span>
+          ) : (
+            <span className="logo">
+              {wordmark.slice(0, accentStart)}
+              {accentStart < wordmark.length ? <span>{wordmark.slice(accentStart)}</span> : null}
+            </span>
+          )}
           <nav className="topbar-nav" aria-label="Main">
             {nav.map((entry) => (
               <Link

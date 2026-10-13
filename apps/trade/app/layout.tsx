@@ -22,11 +22,19 @@ export const metadata: Metadata = {
   manifest: `${BASE_PATH}/manifest.webmanifest`,
   icons: {
     icon: [
-      { url: `${BASE_PATH}/favicon.ico`, sizes: '32x32 16x16' },
+      { url: `${BASE_PATH}/favicon.svg`, type: 'image/svg+xml' },
+      { url: `${BASE_PATH}/favicon.ico`, sizes: '48x48 32x32 16x16' },
       { url: `${BASE_PATH}/icon-192.png`, type: 'image/png', sizes: '192x192' },
     ],
     apple: [{ url: `${BASE_PATH}/apple-touch-icon.png`, sizes: '180x180' }],
   },
+  metadataBase: new URL('https://moneymarkets.trade'),
+  openGraph: {
+    title: 'MoneyMarkets',
+    description: 'Trade on Kuru with Face ID. No wallet, no gas.',
+    images: [{ url: `${BASE_PATH}/og-image.png`, width: 1200, height: 630 }],
+  },
+  twitter: { card: 'summary_large_image', images: [`${BASE_PATH}/og-image.png`] },
   appleWebApp: { capable: true, title: 'MoneyMarkets', statusBarStyle: 'black-translucent' },
   other: { 'mobile-web-app-capable': 'yes' },
 };

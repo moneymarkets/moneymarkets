@@ -1475,6 +1475,29 @@ td {
 .topbar .logo span {
   color: var(--trade);
 }
+/* The logo as an image: one file per theme, the same switch the palette uses. */
+.logo-img img {
+  display: block;
+  height: 26px;
+  width: auto;
+}
+.logo-img .on-dark {
+  display: none;
+}
+[data-theme='dark'] .logo-img .on-light {
+  display: none;
+}
+[data-theme='dark'] .logo-img .on-dark {
+  display: block;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) .logo-img .on-light {
+    display: none;
+  }
+  :root:not([data-theme='light']) .logo-img .on-dark {
+    display: block;
+  }
+}
 .topbar-nav {
   display: flex;
   gap: 4px;

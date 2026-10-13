@@ -26,6 +26,7 @@ import {
   type LinkLike,
   type NavEntry,
 } from '@tradepro/ui';
+import { BASE_PATH } from '../lib/basePath';
 import { useSession } from '../lib/session';
 import { useNotifications } from '../lib/notifications';
 import { MOBILE_NAV, RAIL_NAV } from '../lib/wallet/nav';
@@ -240,6 +241,7 @@ export function Chrome({ children }: { children: ReactNode }) {
         pathname={pathname}
         wordmark="MoneyMarkets"
         wordmarkAccent="Markets"
+        logo={{ light: `${BASE_PATH}/logo.svg`, dark: `${BASE_PATH}/logo-on-dark.svg` }}
         link={nextLink}
         status={footerStatus}
         topRight={
