@@ -1,0 +1,41 @@
+{
+  "name": "moneymarkets",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@10.29.3",
+  "engines": {
+    "node": ">=22.5.0"
+  },
+  "scripts": {
+    "build": "pnpm -r build",
+    "test": "pnpm --filter @tradepro/core build && pnpm -r test",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "typecheck": "pnpm -r typecheck",
+    "audit": "pnpm audit --audit-level=high",
+    "secrets": "gitleaks detect --no-banner --redact -c .gitleaks.toml",
+    "generate-keys": "tsx scripts/generate-keys.ts",
+    "generate-deployer": "tsx scripts/generate-deployer.ts",
+    "export-key": "tsx scripts/export-key.ts"
+  },
+  "devDependencies": {
+    "@eslint/js": "9.39.5",
+    "@tradepro/core": "workspace:*",
+    "@types/node": "24.13.3",
+    "dotenv": "17.4.2",
+    "eslint": "9.39.5",
+    "eslint-config-prettier": "10.1.8",
+    "permissionless": "0.4.0",
+    "prettier": "3.9.6",
+    "puppeteer-core": "^24.43.1",
+    "tsx": "4.23.13",
+    "typescript": "5.9.3",
+    "typescript-eslint": "8.69.0",
+    "viem": "2.56.3",
+    "vitest": "4.1.11"
+  },
+  "license": "MIT",
+  "description": "AUSD-native trading on Kuru, the on-chain order book on Monad. Passkey accounts, sponsored gas, no seed phrase."
+}

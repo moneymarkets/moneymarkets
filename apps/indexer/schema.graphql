@@ -1,0 +1,139 @@
+"""
+Entities per spec section 9.
+
+Two conventions run through the whole schema:
+
+1. Every price field named `*Wire` is human * 1e18. `OrderCreated.price` arrives as a
+   uint32 in the market's own `pricePrecision` and `Trade.price` arrives at 1e18; both
+   are normalised on the way in so a consumer never has to ask which scale it holds.
+   `priceRaw` keeps the value the contract actually emitted so the conversion stays
+   auditable.
+2. Every money value is `BigInt`. Nothing monetary is a `Float` anywhere in this
+   schema (rule A2.6) - a Float would silently round a uint96 size.
+"""
+type Market {
+  "The OrderBook address, lowercased."
+  id: ID!
+  baseAsset: String!
+  quoteAsset: String!
+  vault: String!
+  "The scale `OrderCreated.price` is denominated in. 1e8 on the live MON books."
+  pricePrecision: BigInt!
+  sizePrecision: BigInt!
+  tickSize: BigInt!
+  minSize: BigInt!
+  maxSize: BigInt!
+  takerFeeBps: BigInt!
+  makerFeeBps: BigInt!
+  kuruAmmSpread: BigInt!
+  registeredBlock: Int!
+}
+
+enum OrderStatus {
+  OPEN
+  PARTIALLY_FILLED
+  FILLED
+  CANCELED
+}
+
+enum Side {
+  BUY
+  SELL
+}
+
+"""
+A resting order.
+
+`id` is `<market>-<orderId>`, never the bare `orderId`: Kuru numbers orders per order
+book, so the same uint40 exists in several markets at once. Keying on the bare id
+would merge unrelated users' orders into one row.
+"""
+type Order {
+  id: ID!
+  market: Market!
+  orderId: BigInt!
+  "Lowercased EOA. This is the `_msgSender()`, not whoever paid gas."
+  owner: String!
+  side: Side!
+  "human * 1e18"
+  priceWire: BigInt!
+  "The uint32 the contract emitted, in the market's pricePrecision."
+  priceRaw: BigInt!
+  "Original size, in sizePrecision units."
+  size: BigInt!
+  "What is still resting. Tracks `Trade.updatedSize`, which is the remainder."
+  remaining: BigInt!
+  status: OrderStatus!
+  createdBlock: Int!
+  createdTxHash: String!
+  lastUpdatedBlock: Int!
+}
+
+"""
+One `Trade` log: a taker hitting a maker's resting order.
+
+`orderId` is the MAKER's order. Both sides are recorded because `/portfolio` has to
+find a user's fills whether they were resting or crossing, and no Kuru event indexes
+anything, so there is no server-side topic filter to lean on.
+"""
+type Fill {
+  id: ID!
+  market: Market!
+  order: Order
+  orderId: BigInt!
+  maker: String!
+  taker: String!
+  "Whoever paid gas. Under sponsored gas this is a bundler, not the user."
+  txOrigin: String!
+  isBuy: Boolean!
+  "human * 1e18. `Trade.price` is already at this scale."
+  priceWire: BigInt!
+  filledSize: BigInt!
+  "Remainder left on the maker's order after this fill."
+  updatedSize: BigInt!
+  "Notional in the quote asset's base units."
+  quoteValue: BigInt!
+  blockNumber: Int!
+  timestamp: Int!
+  txHash: String!
+  logIndex: Int!
+}
+
+"""
+One `OrdersCanceled` log.
+
+The event is plural and carries a `uint40[]`, even when a single order is cancelled.
+Measured over blocks 101340850..101341449 on the four live books, 1,152 cancel logs
+carried 1,841 order ids - so `orderIds` routinely holds more than one, and
+`orderCount` is stored so a consumer can see that without re-counting.
+"""
+type Cancel {
+  id: ID!
+  market: Market!
+  owner: String!
+  "Every id in the batch, as strings to keep full uint40 range in a JSON client."
+  orderIds: [String!]!
+  orderCount: Int!
+  blockNumber: Int!
+  timestamp: Int!
+  txHash: String!
+  logIndex: Int!
+}
+
+"""
+Running totals per address, so `/portfolio` can render a header without paging the
+whole fill history.
+
+A user is credited once per fill they were party to. Self-trades (maker == taker)
+count once, not twice.
+"""
+type UserStats {
+  "Lowercased address."
+  id: ID!
+  "Sum of fill notionals in quote base units. Mixes quote assets across markets."
+  volumeQuote: BigInt!
+  fills: Int!
+  ordersPlaced: Int!
+  ordersCanceled: Int!
+  lastSeenBlock: Int!
+}

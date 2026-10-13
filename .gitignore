@@ -1,0 +1,26 @@
+node_modules/
+dist/
+build/
+.next/
+.next-*/
+out/
+/coverage/
+**/coverage/lcov-report/
+*.tsbuildinfo
+.turbo/
+generated/
+.scratch/
+*.log
+.DS_Store
+
+# Local settings and data
+.env
+.env.*
+!.env.example
+*.sqlite
+*.sqlite-shm
+*.sqlite-wal
+*.sqlite-journal
+
+# Local key material. Never committed.
+.secrets/

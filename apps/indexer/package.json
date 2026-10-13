@@ -1,0 +1,22 @@
+{
+  "name": "@tradepro/indexer",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "tsc -p tsconfig.json --noEmit",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run",
+    "fetch-fixtures": "tsx scripts/fetch-fixtures.ts",
+    "codegen": "envio codegen",
+    "dev": "envio dev"
+  },
+  "dependencies": {
+    "@tradepro/core": "workspace:*",
+    "viem": "2.56.3"
+  },
+  "devDependencies": {
+    "tsx": "4.23.13",
+    "vitest": "4.1.11"
+  }
+}

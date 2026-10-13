@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Market kit</title>
+    <link rel="stylesheet" href="/tokens.css" />
+    <link rel="stylesheet" href="/kit.css" />
+  </head>
+  <body>
+    <main class="page">
+      <header class="between page-head">
+        <div>
+          <h1>Market kit</h1>
+          <p class="small">Deploy a Kuru market, seed it, check it, take the money back.</p>
+        </div>
+        <div class="chips" id="state-chips" aria-live="polite">
+          <span class="chip">Reading the chain</span>
+        </div>
+      </header>
+
+      <section class="hero stack" aria-labelledby="operator-label">
+        <div class="between">
+          <div>
+            <div class="small" id="operator-label">Operator</div>
+            <div class="num addr" id="operator">—</div>
+          </div>
+          <div class="right">
+            <div class="small">Block</div>
+            <div class="num" id="block">—</div>
+          </div>
+        </div>
+        <p class="small" id="sign-reason">Checking whether signing is armed.</p>
+      </section>
+
+      <section class="card stack">
+        <div class="between">
+          <h3>Market</h3>
+          <span class="chip" id="market-kind">—</span>
+        </div>
+        <div class="seg" id="market-seg" data-count="3" data-i="0" role="group" aria-label="Market">
+          <span class="thumb" aria-hidden="true"></span>
+          <button type="button" data-market="MON_AUSD" aria-pressed="true">MON / AUSD</button>
+          <button type="button" data-market="USDT0_AUSD" aria-pressed="false">USDT0 / AUSD</button>
+          <button type="button" data-market="AUSD_USDC" aria-pressed="false">AUSD / USDC</button>
+        </div>
+
+        <div id="params-empty" class="notice" hidden>
+          Nothing loaded yet. Pick a market above and the parameters appear.
+        </div>
+        <div id="params-loading" class="skeleton" aria-hidden="true">
+          <span></span><span></span><span></span><span></span>
+        </div>
+        <div id="params-error" class="notice err" hidden></div>
+
+        <dl class="params" id="params" hidden></dl>
+
+        <div id="deploy-block" hidden>
+          <hr class="sep" />
+          <p class="small">
+            This market does not exist. The parameters above are what
+            <span class="num">Router.deployProxy</span> would be sent, and the addresses are what
+            the Router itself predicted for them.
+          </p>
+          <button class="btn ghost block" type="button" id="deploy-btn">Dry run the deploy</button>
+        </div>
+      </section>
+
+      <section class="card stack" id="seed-card">
+        <h3>Seed</h3>
+
+        <div class="grid2">
+          <div class="field">
+            <label for="fee-bps">Spacing</label>
+            <input id="fee-bps" class="num" type="number" min="1" step="1" value="30" />
+          </div>
+          <div class="field">
+            <label for="size-per-level">Size per level, in quote</label>
+            <input id="size-per-level" class="num" type="text" value="5.50" />
+          </div>
+        </div>
+        <p class="small" id="pps-note" aria-live="polite">Stored as 3000 pps</p>
+
+        <div class="grid2">
+          <div class="field">
+            <label for="band">Band</label>
+            <input id="band" type="text" value="0.98..1.02" />
+          </div>
+          <div class="field">
+            <label for="levels">Levels per side</label>
+            <input id="levels" class="num" type="number" min="1" max="24" step="1" value="6" />
+          </div>
+        </div>
+
+        <div class="grid2">
+          <div class="field">
+            <label for="side">Sides</label>
+            <select id="side">
+              <option value="both">Buy and sell</option>
+              <option value="buy">Buy only</option>
+              <option value="sell">Sell only</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="ref">Anchor</label>
+            <input id="ref" type="text" placeholder="from the book" />
+          </div>
+        </div>
+
+        <div class="field" id="ref-source-field" hidden>
+          <label for="ref-source">Where that anchor price came from</label>
+          <input
+            id="ref-source"
+            type="text"
+            placeholder="the book you read, the quote you took, the date"
+          />
+        </div>
+
+        <button class="btn primary block" type="button" id="dryrun-btn">Dry run</button>
+        <button class="btn ghost block" type="button" id="sign-btn" disabled>
+          Sign — needs MODE=live
+        </button>
+      </section>
+
+      <section class="card stack" id="ladder-card" hidden>
+        <div class="between">
+          <h3>Ladder</h3>
+          <span class="chip acc num" id="ladder-count">—</span>
+        </div>
+        <div class="notice ok" id="ladder-notice"></div>
+        <div class="ladder" id="ladder" role="table" aria-label="Ladder levels"></div>
+        <div class="between">
+          <span class="small">Total capital</span>
+          <span class="num small" id="ladder-total">—</span>
+        </div>
+        <details>
+          <summary class="small">The transactions this would send</summary>
+          <div class="calls" id="calls"></div>
+        </details>
+        <details>
+          <summary class="small">The same run as a command</summary>
+          <pre class="cmd num" id="command"></pre>
+        </details>
+      </section>
+
+      <section class="card stack">
+        <h3>Teardown</h3>
+        <p class="small">
+          Cancel every resting order this operator owns on the selected market, then withdraw what
+          the MarginAccount is holding. Flip orders and plain orders cancel through different
+          functions; the scan splits them.
+        </p>
+        <button class="btn ghost block" type="button" id="teardown-btn">
+          Dry run the teardown
+        </button>
+        <div class="notice" id="teardown-result" hidden></div>
+      </section>
+
+      <p class="tiny muted footnote">
+        Served from loopback. No key reaches this page: signing runs in the local process against
+        the encrypted deployer keystore, and only when the mode gate is open.
+      </p>
+    </main>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+    <script src="/kit.js"></script>
+  </body>
+</html>

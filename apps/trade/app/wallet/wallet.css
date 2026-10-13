@@ -1,0 +1,230 @@
+/*
+ * `/wallet` page-scoped styles (REDESIGN-PROMPT.txt, "Wallet"). Everything generic
+ * (the hero, card, row, chip, seg, toggle, field, notice, sheet, disclosure, the
+ * four-verb `.actions` row and `.waiting` box) already lives in
+ * `@tradepro/ui/tokens.css` — this file only adds the layout that is specific to
+ * this screen: the hero's amount-beside-actions arrangement, the trading/wallet
+ * split bar above the existing split boxes, the two-column holdings/aside grid,
+ * the bigger free-actions ring panel, and the add-token-by-address reveal.
+ *
+ * Nothing here duplicates a shared component's own look (colour, radius, type) —
+ * only position, size and the couple of animations this screen's own motion table
+ * asks for (chip flip, fresh-activity slide-in). The global
+ * `prefers-reduced-motion` rule in `tokens.css` already collapses every animation
+ * and transition declared below to ~0, so no second guard is needed here.
+ */
+
+.pg-wallet .hero {
+  overflow: hidden;
+}
+
+/* Amount on the left, the four actions on the right (mockup's `.hero` grid), down
+   to one column once the hero can no longer fit both comfortably. */
+.pg-wallet-herorow {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+.pg-wallet-heroactions {
+  flex: 0 0 auto;
+}
+.pg-wallet-heroactions .actions {
+  max-width: 380px;
+  min-width: 260px;
+}
+@media (max-width: 1000px) {
+  .pg-wallet-herorow {
+    align-items: stretch;
+  }
+  .pg-wallet-heroactions,
+  .pg-wallet-heroactions .actions {
+    max-width: none;
+    width: 100%;
+  }
+}
+
+/* The proportional split bar above the existing trading/wallet split boxes. */
+.pg-wallet-splitbar {
+  display: flex;
+  gap: 3px;
+  height: 10px;
+  border-radius: var(--r-pill);
+  overflow: hidden;
+  margin: 16px 0 10px;
+}
+.pg-wallet-splitbar > span {
+  height: 100%;
+  transition: flex-basis 0.9s var(--ease);
+}
+
+/* Two-column grid: holdings (left) and the aside stack (right). One column under
+   1000px, matching the breakpoint every other redesigned grid uses. */
+.pg-wallet-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.7fr) minmax(0, 1fr);
+  gap: 20px;
+  align-items: start;
+}
+@media (max-width: 1000px) {
+  .pg-wallet-grid {
+    grid-template-columns: 1fr;
+  }
+}
+.pg-wallet-col-main,
+.pg-wallet-col-aside {
+  display: grid;
+  gap: 14px;
+}
+
+/* A holding row's pocket chip(s), under the symbol/name rather than in a separate
+   column — true at every width, which is also the mobile "two-line" layout the
+   spec asks for, so no extra breakpoint is needed. */
+.pg-wallet-chips {
+  display: flex;
+  gap: 6px;
+  margin-top: 3px;
+}
+.pg-wallet-chips .chip {
+  font-size: 11px;
+  padding: 2px 8px;
+}
+
+/* The chip's one-time flip when its row's token just moved pocket (spec: "the chip
+   flips from Wallet to Trading"). Triggered by the same `flashing` state the row's
+   own one-time glow already uses — no new state, just a second class on it. */
+@keyframes pg-wallet-chipflip {
+  0% {
+    transform: rotateX(0deg);
+  }
+  45% {
+    transform: rotateX(90deg);
+    opacity: 0.4;
+  }
+  55% {
+    transform: rotateX(90deg);
+    opacity: 0.4;
+  }
+  100% {
+    transform: rotateX(0deg);
+  }
+}
+.pg-wallet-chipflip {
+  display: inline-block;
+  animation: pg-wallet-chipflip 0.6s var(--ease);
+}
+
+/* The waiting token's amber box, nested inside its own holdings row instead of a
+   full-width banner above the list. `.waiting` itself (colour, radius, padding) is
+   the shared component; this only narrows its margin to read as part of the row. */
+.pg-wallet-waiting-wrap {
+  margin: 2px 4px 12px 50px;
+}
+@media (max-width: 480px) {
+  .pg-wallet-waiting-wrap {
+    margin-left: 4px;
+  }
+}
+
+/* Add token by address: a reveal under Holdings, using the shared `Disclosure`
+   height transition. */
+.pg-wallet-addrow {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  align-items: center;
+  padding-top: 10px;
+}
+.pg-wallet-addrow input {
+  flex: 1;
+  min-width: 200px;
+  padding: 10px 14px;
+  border-radius: var(--r-pill);
+  border: 1px solid var(--line);
+  background: var(--surface-2);
+  color: var(--ink);
+  font: inherit;
+  font-size: 16px;
+  outline: none;
+}
+.pg-wallet-addrow input:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+.pg-wallet-holdfoot {
+  margin-top: 10px;
+  padding-top: 14px;
+  border-top: 1px solid var(--line);
+}
+
+/* The free-actions ring panel: a bigger ring beside its own heading, the existing
+   fine print underneath (unchanged text, moved here from the old plain card). */
+.pg-wallet-free {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 16px;
+  align-items: center;
+}
+.pg-wallet-bigring {
+  position: relative;
+  width: 92px;
+  height: 92px;
+  flex: none;
+}
+.pg-wallet-bigring svg {
+  transform: rotate(-90deg);
+}
+.pg-wallet-bigring circle {
+  fill: none;
+  stroke-width: 8;
+}
+.pg-wallet-bigring .track {
+  stroke: var(--line);
+}
+.pg-wallet-bigring .fill {
+  stroke: var(--ok);
+  stroke-linecap: round;
+  transition: stroke-dashoffset 1.1s var(--ease);
+}
+.pg-wallet-bigring-num {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  text-align: center;
+  font-weight: 600;
+  font-size: 24px;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+}
+.pg-wallet-bigring-num small {
+  display: block;
+  margin-top: -4px;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--ink-3);
+}
+
+/* A freshly-landed activity row (spec: "the new activity row slides in"), after a
+   Move just confirmed — the same look the mockup's `.acts li.new` uses. */
+@keyframes pg-wallet-actin {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.pg-wallet-act-fresh {
+  animation: pg-wallet-actin 0.5s var(--ease);
+}
+
+@media (max-width: 720px) {
+  .pg-wallet-bigring {
+    width: 80px;
+    height: 80px;
+  }
+}

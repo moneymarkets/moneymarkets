@@ -1,0 +1,2506 @@
+/*
+ * tradepro design system — tokens and class contracts.
+ *
+ * Redesign 2026-09-30 (see design/tradepro-redesign.html and the owner's brief,
+ * `REDESIGN-PROMPT.txt`): a visual-only reskin onto a dark-green/white palette.
+ * Values below are ported from the mockup's `:root`, `:root[data-theme="light"]`
+ * and `prefers-color-scheme` blocks. The class contracts already in this file
+ * (`.hero .card .row .btn .chip .seg .field .notice .book .lvl .state .step .sheet
+ * .toast` and the rest) keep their names and structure — every existing page still
+ * renders through them — only their token values and a few structural rules
+ * (radius, easing, motion) change. See design/REDESIGN-FOUNDATION.md for the full
+ * class/token index this reskin adds.
+ *
+ * Mapping from the mockup's own token names onto this file's pre-existing semantic
+ * names (kept so every rule below that already reads `var(--accent)`, `var(--up)`,
+ * etc. repaints correctly with no rule-by-rule rewrite):
+ *   --bg -> mockup --bg        --surface -> mockup --panel   --surface-2 -> --panel-2
+ *   --line -> mockup --line    --ink -> mockup --text        --ink-2 -> mockup --muted
+ *   --ink-3 -> mockup --faint  --accent/--up -> mockup --trade (primary action, buy, gains)
+ *   --down -> mockup --sell (sell, losses)   --warn -> mockup --wallet (wallet/caution)
+ * The mockup's own names are also kept as first-class tokens (`--trade`, `--wallet`,
+ * `--ok`, `--sell`, `--on-trade`, `--on-sell`, `--scrim`) for new markup that wants
+ * them directly (status dots, chip modifiers, the top bar).
+ *
+ * Direction: a bank statement, not a terminal. Nothing blinks unless the user did
+ * something (design §1).
+ */
+
+:root {
+  --bg: #ffffff;
+  --surface: #f3f7f5;
+  --surface-2: #e6eeea;
+  --line: #d9e4de;
+  --ink: #0e1f17;
+  --ink-2: #4d6559;
+  --ink-3: #7f9288;
+  --accent: #0e9f63;
+  --accent-ink: #ffffff;
+  --accent-soft: color-mix(in srgb, var(--accent) 12%, transparent);
+  --up: #0e9f63;
+  --up-soft: color-mix(in srgb, var(--up) 16%, transparent);
+  --down: #d6392b;
+  --down-soft: color-mix(in srgb, var(--down) 14%, transparent);
+  --warn: #b8740c;
+  --warn-soft: color-mix(in srgb, var(--warn) 16%, transparent);
+  --hero: #eef4f1;
+
+  /* The mockup's own vocabulary, alongside the semantic names above. */
+  --trade: #0e9f63;
+  --on-trade: #ffffff;
+  --wallet: #b8740c;
+  --ok: #15803d;
+  --sell: #d6392b;
+  --on-sell: #ffffff;
+  --scrim: rgba(14, 31, 23, 0.35);
+
+  --r-hero: 24px;
+  --r-card: 16px;
+  --r-row: 14px;
+  --r-pill: 999px;
+
+  --font-display: 'Bricolage Grotesque', ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-ui: 'Bricolage Grotesque', ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/*
+ * Dark mode is a real colour — deep spruce — not a tinted black (design §2.1).
+ *
+ * Three states, because a user has three: an explicit choice stamps
+ * `data-theme` on the root and always wins; with no choice stamped, the operating
+ * system's setting decides. The media block is therefore guarded against an
+ * explicit light choice, so "light" on a phone in dark mode really is light.
+ */
+[data-theme='dark'] {
+  --bg: #0b1a14;
+  --surface: #11241c;
+  --surface-2: #183026;
+  --line: #224034;
+  --ink: #eaf4ee;
+  --ink-2: #9db8aa;
+  --ink-3: #6b877a;
+  --accent: #3dd68c;
+  --accent-ink: #06140e;
+  --accent-soft: color-mix(in srgb, var(--accent) 16%, transparent);
+  --up: #3dd68c;
+  --up-soft: color-mix(in srgb, var(--up) 18%, transparent);
+  --down: #ff7d6e;
+  --down-soft: color-mix(in srgb, var(--down) 16%, transparent);
+  --warn: #f2b35e;
+  --warn-soft: color-mix(in srgb, var(--warn) 16%, transparent);
+  --hero: #16281f;
+
+  --trade: #3dd68c;
+  --on-trade: #06140e;
+  --wallet: #f2b35e;
+  --ok: #a6e36b;
+  --sell: #ff7d6e;
+  --on-sell: #1a0805;
+  --scrim: rgba(3, 10, 7, 0.65);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --bg: #0b1a14;
+    --surface: #11241c;
+    --surface-2: #183026;
+    --line: #224034;
+    --ink: #eaf4ee;
+    --ink-2: #9db8aa;
+    --ink-3: #6b877a;
+    --accent: #3dd68c;
+    --accent-ink: #06140e;
+    --accent-soft: color-mix(in srgb, var(--accent) 16%, transparent);
+    --up: #3dd68c;
+    --up-soft: color-mix(in srgb, var(--up) 18%, transparent);
+    --down: #ff7d6e;
+    --down-soft: color-mix(in srgb, var(--down) 16%, transparent);
+    --warn: #f2b35e;
+    --warn-soft: color-mix(in srgb, var(--warn) 16%, transparent);
+    --hero: #16281f;
+
+    --trade: #3dd68c;
+    --on-trade: #06140e;
+    --wallet: #f2b35e;
+    --ok: #a6e36b;
+    --sell: #ff7d6e;
+    --on-sell: #1a0805;
+    --scrim: rgba(3, 10, 7, 0.65);
+  }
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-padding-top: calc(90px + env(safe-area-inset-top, 0px));
+}
+html,
+body {
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-ui);
+  font-variant-numeric: tabular-nums;
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
+  overscroll-behavior-y: none;
+  transition:
+    background 0.35s var(--ease),
+    color 0.35s var(--ease);
+}
+
+button {
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+
+input,
+select {
+  font: inherit;
+  color: inherit;
+}
+
+/* Every tappable row/button eases back slightly on press (rule C, mobile touch). */
+@media (hover: none) {
+  a:hover,
+  button:hover {
+    filter: none;
+  }
+}
+
+/* Accessibility floor (design §7): a visible ring on every control. */
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+
+/* ---------- type ---------- */
+h1,
+h2,
+h3 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+h1 {
+  font-size: 28px;
+  line-height: 1.1;
+}
+h2 {
+  font-size: 18px;
+}
+h3 {
+  font-size: 15px;
+}
+p {
+  margin: 0;
+  line-height: 1.5;
+  color: var(--ink-2);
+}
+.muted {
+  color: var(--ink-3);
+}
+.num {
+  font-variant-numeric: tabular-nums;
+}
+.small {
+  font-size: 13px;
+}
+.tiny {
+  font-size: 12px;
+}
+
+/* ---------- three card tiers ---------- */
+.hero {
+  background: var(--hero);
+  border-radius: var(--r-hero);
+  padding: 24px 22px;
+  transition: background 0.35s var(--ease);
+}
+.card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-card);
+  padding: 16px;
+  transition:
+    background 0.35s var(--ease),
+    border-color 0.35s var(--ease);
+}
+.row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 10px;
+  border-radius: var(--r-row);
+  transition:
+    background 0.2s,
+    transform 0.15s var(--ease);
+}
+.row:hover {
+  background: var(--surface-2);
+}
+@media (hover: none) {
+  button.row:active {
+    transform: scale(0.98);
+    background: var(--surface-2);
+  }
+}
+.row + .row {
+  border-top: 1px solid var(--line);
+}
+.row .grow {
+  flex: 1;
+  min-width: 0;
+}
+.row .t {
+  font-weight: 500;
+}
+.row .s {
+  font-size: 12px;
+  color: var(--ink-3);
+}
+.card > .row {
+  margin: 0 -6px;
+}
+.list {
+  display: flex;
+  flex-direction: column;
+}
+
+/* ---------- controls ---------- */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 11px 20px;
+  border-radius: var(--r-pill);
+  font-weight: 600;
+  font-size: 14px;
+  min-height: 44px;
+  white-space: nowrap;
+  transition:
+    transform 0.15s var(--ease),
+    filter 0.2s,
+    background 0.2s,
+    opacity 0.2s;
+  user-select: none;
+}
+.btn:active {
+  transform: scale(0.97);
+}
+.btn.primary {
+  background: var(--accent);
+  color: var(--accent-ink);
+}
+.btn.primary:hover {
+  filter: brightness(1.08);
+}
+/*
+ * Every variant states its own colour, including the ones whose colour is "the
+ * normal text colour". A button is often wrapped in a link so the whole control
+ * navigates, and an inheriting button then picks up the browser's link and
+ * visited-link colours — which is how "Trade" and "Choose a source" were rendering
+ * violet on Home.
+ */
+.btn.ghost {
+  background: var(--surface-2);
+  color: var(--ink);
+}
+.btn.ghost:hover {
+  background: var(--line);
+}
+.btn.soft {
+  background: var(--surface-2);
+  color: var(--ink);
+}
+/* The mockup's outline variant: transparent fill, a hairline instead of a solid
+   surface (design system's `line`, alongside the pre-existing `ghost`/`soft`). */
+.btn.line {
+  background: transparent;
+  color: var(--ink);
+  box-shadow: inset 0 0 0 1px var(--line);
+}
+.btn.line:hover {
+  background: var(--surface-2);
+}
+.btn.up {
+  background: var(--up);
+  color: var(--on-trade);
+}
+.btn.down,
+.btn.sell {
+  background: var(--down);
+  color: var(--on-sell);
+}
+.btn.block {
+  width: 100%;
+}
+.btn.sm {
+  padding: 8px 14px;
+  font-size: 13px;
+  min-height: 36px;
+}
+.btn.lg {
+  padding: 15px 26px;
+  font-size: 16px;
+}
+.btn[disabled] {
+  opacity: 0.45;
+  cursor: not-allowed;
+  transform: none;
+  filter: none;
+}
+.btn.busy {
+  opacity: 0.85;
+  cursor: progress;
+}
+/* Button spinner (design §2.4: buttons show a spinner while their async action
+   runs). Callers add this next to their label when `busy`/pending. */
+.btn .spin {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  animation: btn-spin 0.7s linear infinite;
+}
+@keyframes btn-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/*
+ * The "fieldbox" look (mockup `.fieldbox`): label and input share one soft-filled
+ * box instead of a bordered input sitting under a separate label — same `.field`
+ * contract (`label` + `input`/`select`, `Field`/`Select` unchanged), restyled.
+ */
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  background: var(--surface-2);
+  border-radius: 16px;
+  padding: 10px 14px;
+  border: 1px solid transparent;
+  transition:
+    border-color 0.2s,
+    box-shadow 0.2s;
+}
+.field:focus-within {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+.field label {
+  font-size: 12px;
+  color: var(--ink-2);
+}
+.field input,
+.field select {
+  padding: 2px 0;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  font-size: 19px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  width: 100%;
+}
+.field input:focus,
+.field select:focus {
+  outline: none;
+}
+.field input[readonly] {
+  color: var(--ink-2);
+}
+
+.seg {
+  display: flex;
+  background: var(--bg);
+  border-radius: var(--r-pill);
+  padding: 4px;
+  position: relative;
+}
+.card .seg,
+.hero .seg {
+  background: var(--bg);
+}
+.seg button {
+  flex: 1;
+  padding: 8px 10px;
+  border-radius: var(--r-pill);
+  font-weight: 500;
+  font-size: 14px;
+  color: var(--ink-3);
+  position: relative;
+  z-index: 1;
+  min-height: 40px;
+  transition: color 0.25s;
+  white-space: nowrap;
+}
+.seg button[aria-pressed='true'] {
+  color: var(--ink);
+}
+.seg .thumb {
+  position: absolute;
+  top: 4px;
+  bottom: 4px;
+  width: calc(50% - 4px);
+  left: 4px;
+  background: var(--surface-2);
+  border-radius: var(--r-pill);
+  transition:
+    transform 0.4s var(--ease),
+    background 0.3s;
+}
+.seg[data-i='1'] .thumb {
+  transform: translateX(100%);
+}
+.seg[data-count='3'] .thumb {
+  width: calc(33.333% - 2px);
+}
+.seg[data-count='3'][data-i='1'] .thumb {
+  transform: translateX(100%);
+}
+.seg[data-count='3'][data-i='2'] .thumb {
+  transform: translateX(200%);
+}
+/* Four options: Swap's slippage choices (0.1, 0.5, 1, 3%). */
+.seg[data-count='4'] .thumb {
+  width: calc(25% - 1.5px);
+}
+.seg[data-count='4'][data-i='1'] .thumb {
+  transform: translateX(100%);
+}
+.seg[data-count='4'][data-i='2'] .thumb {
+  transform: translateX(200%);
+}
+.seg[data-count='4'][data-i='3'] .thumb {
+  transform: translateX(300%);
+}
+
+/* Chips carry status, never decoration (design §3). */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 10px;
+  border-radius: var(--r-pill);
+  font-size: 12px;
+  font-weight: 500;
+  background: var(--surface-2);
+  color: var(--ink-2);
+}
+.chip.up {
+  background: var(--up-soft);
+  color: var(--up);
+}
+.chip.down {
+  background: var(--down-soft);
+  color: var(--down);
+}
+.chip.warn {
+  background: var(--warn-soft);
+  color: var(--warn);
+}
+.chip.acc {
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+/* The mockup's own tone names, for markup that wants them directly (e.g. "on Kuru"
+   vs "in your wallet" pockets) — same visual language as `.up`/`.down`/`.warn`. */
+.chip.trading {
+  background: color-mix(in srgb, var(--trade) 16%, transparent);
+  color: var(--trade);
+}
+.chip.wallet {
+  background: color-mix(in srgb, var(--wallet) 16%, transparent);
+  color: var(--wallet);
+}
+.chip.ok {
+  background: color-mix(in srgb, var(--ok) 16%, transparent);
+  color: var(--ok);
+}
+.chip.bad {
+  background: var(--down-soft);
+  color: var(--down);
+}
+.chip.mute {
+  background: var(--surface-2);
+  color: var(--ink-2);
+}
+.chip.dot::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  flex: none;
+}
+.chip.pulse::before {
+  animation: blink 1.1s infinite;
+}
+
+.grid2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+.between {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+}
+.stack {
+  display: grid;
+  gap: 10px;
+}
+hr.sep {
+  border: 0;
+  border-top: 1px solid var(--line);
+  margin: 6px 0;
+}
+
+/* ---------- balance ---------- */
+.amount {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 52px;
+  line-height: 1;
+  letter-spacing: -0.03em;
+  display: flex;
+  align-items: baseline;
+  gap: 2px;
+}
+.amount .cur {
+  font-size: 22px;
+  color: var(--ink-2);
+  font-weight: 500;
+  margin-right: 6px;
+  align-self: flex-start;
+  margin-top: 8px;
+}
+.amount .cents {
+  font-size: 24px;
+  color: var(--ink-2);
+  font-weight: 500;
+}
+.amount.bump {
+  animation: bump 0.5s var(--ease);
+}
+@keyframes bump {
+  0% {
+    transform: scale(1);
+  }
+  30% {
+    transform: scale(1.03);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/*
+ * Entrance motion (design/tradepro-redesign.html): the top bar fades down once on
+ * first load, and a page's sections rise in with a short stagger. Nothing else
+ * animates on entry (rule A6) — these two classes are the only ones a page mounts
+ * unconditionally; everything else in this file answers an action.
+ */
+@keyframes fadeDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.fade-down {
+  animation: fadeDown 0.7s var(--ease) both;
+}
+/* Apply with an inline `style={{ animationDelay: `${i * 80}ms` }}` for a stagger
+   across a page's sections — see design/REDESIGN-FOUNDATION.md. */
+.rise {
+  animation: rise 0.6s var(--ease) both;
+}
+
+/* ---------- passkey ---------- */
+.passkey {
+  position: relative;
+  display: grid;
+  place-items: center;
+  height: 140px;
+  margin: 10px 0;
+}
+.passkey .ring {
+  position: absolute;
+  width: 88px;
+  height: 88px;
+  border-radius: 50%;
+  border: 2px solid var(--accent);
+  opacity: 0;
+}
+.passkey.pulsing .ring {
+  animation: ring 1.2s var(--ease) infinite;
+}
+.passkey.pulsing .ring:nth-child(2) {
+  animation-delay: 0.3s;
+}
+.passkey.pulsing .ring:nth-child(3) {
+  animation-delay: 0.6s;
+}
+@keyframes ring {
+  0% {
+    transform: scale(0.6);
+    opacity: 0.9;
+  }
+  100% {
+    transform: scale(1.9);
+    opacity: 0;
+  }
+}
+.passkey .face {
+  width: 88px;
+  height: 88px;
+  border-radius: 50%;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  display: grid;
+  place-items: center;
+  transition:
+    background 0.3s,
+    border-color 0.3s;
+}
+.passkey.done .face {
+  background: var(--up);
+  border-color: var(--up);
+  color: #fff;
+}
+
+/* Notices state the fact and the fix; they never apologise (design §6). */
+.notice {
+  display: flex;
+  gap: 10px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: var(--warn-soft);
+  color: var(--ink);
+  font-size: 13px;
+  line-height: 1.45;
+}
+.notice.err {
+  background: var(--down-soft);
+}
+.notice.ok {
+  background: var(--up-soft);
+}
+
+/* App-wide banners (e.g. GasChargeBanner) mount as the first child of `<main>`,
+   outside any page's own `.page` wrapper, so without this they ran edge to edge
+   instead of lining up with the page content below them. Same max-width/gutters
+   as `.page`, same 720px row->column break as everything else in this file. */
+.app-banner {
+  max-width: 1240px;
+  margin: 10px auto;
+  padding: 0 20px;
+}
+@media (min-width: 960px) {
+  .app-banner {
+    padding: 0 28px;
+  }
+}
+.app-banner-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+}
+.app-banner-text {
+  flex: 1;
+  min-width: 0;
+}
+.app-banner-actions {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+}
+@media (max-width: 720px) {
+  .app-banner-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .app-banner-actions {
+    width: 100%;
+  }
+}
+
+/* ---------- order book ---------- */
+.book {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2px;
+  font-size: 13px;
+}
+.book .side {
+  display: grid;
+  gap: 2px;
+}
+.lvl {
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+  padding: 6px 8px;
+  border-radius: 6px;
+  overflow: hidden;
+}
+.lvl .bar {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  opacity: 0.14;
+  transition: width 0.4s var(--ease);
+}
+.lvl.bid .bar {
+  right: 0;
+  background: var(--up);
+}
+.lvl.ask .bar {
+  left: 0;
+  background: var(--down);
+}
+.lvl span {
+  position: relative;
+  z-index: 1;
+}
+.lvl.bid .px {
+  color: var(--up);
+}
+.lvl.ask .px {
+  color: var(--down);
+}
+.mid {
+  text-align: center;
+  padding: 10px;
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-weight: 600;
+}
+.spread {
+  text-align: center;
+  font-size: 12px;
+  color: var(--ink-3);
+}
+/* Invariant I1 or I6 failing desaturates the book rather than hiding it. */
+.book.dim {
+  opacity: 0.35;
+  filter: saturate(0);
+}
+
+/* ---------- ticket state machine (spec §6.2) ---------- */
+.state {
+  display: flex;
+  gap: 4px;
+  margin-top: 10px;
+}
+.state .st {
+  flex: 1;
+  height: 6px;
+  border-radius: 3px;
+  background: var(--surface-2);
+  position: relative;
+  overflow: hidden;
+  transition: background 0.3s;
+}
+.state .st.done {
+  background: var(--accent);
+}
+.state .st.failed {
+  background: var(--down);
+}
+/* How much of the active stage has finished, when a stage has countable steps inside it
+   (Swap's five checks before Face ID). A width, not an animation. */
+.state .st .fill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  background: var(--accent);
+  transition: width 0.3s;
+}
+/* Only a stage still in progress sweeps. A settled run passes no `active`, so a
+   finished action stops moving — see the note on `settled` in TicketState. */
+.state .st.active::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, var(--accent), transparent);
+  animation: sweep 1s linear infinite;
+}
+@keyframes sweep {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(100%);
+  }
+}
+.statelbl {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  color: var(--ink-3);
+  margin-top: 6px;
+}
+.statelbl span.on {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+/* ---------- orders ---------- */
+.order {
+  display: grid;
+  grid-template-columns: auto 1fr auto auto;
+  gap: 12px;
+  align-items: center;
+  padding: 12px 8px;
+  border-radius: var(--r-row);
+}
+.order + .order {
+  border-top: 1px solid var(--line);
+}
+.order.enter {
+  animation: enter 0.45s var(--ease);
+}
+@keyframes enter {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+    background: var(--accent-soft);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.order.leave {
+  animation: leave 0.3s var(--ease) forwards;
+}
+@keyframes leave {
+  to {
+    opacity: 0;
+    transform: translateX(24px);
+    height: 0;
+    padding: 0;
+    margin: 0;
+  }
+}
+/* Side is a badge AND a label: colour is never the only signal (design §7). */
+.sidebadge {
+  width: 8px;
+  height: 32px;
+  border-radius: 4px;
+}
+.sidebadge.buy {
+  background: var(--up);
+}
+.sidebadge.sell {
+  background: var(--down);
+}
+
+/* ---------- funding stepper ---------- */
+.steps {
+  display: grid;
+  gap: 0;
+}
+.step {
+  display: grid;
+  grid-template-columns: 28px 1fr;
+  gap: 12px;
+  align-items: start;
+  padding: 10px 0;
+}
+.step .dot {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  border: 2px solid var(--line);
+  background: var(--surface);
+  transition: all 0.3s var(--ease);
+  position: relative;
+}
+.step.active .dot {
+  border-color: var(--accent);
+}
+.step.active .dot::after {
+  content: '';
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--accent);
+  animation: blink 1s infinite;
+}
+@keyframes blink {
+  50% {
+    opacity: 0.3;
+  }
+}
+.step.done .dot {
+  background: var(--up);
+  border-color: var(--up);
+  color: #fff;
+}
+.step .lbl {
+  font-weight: 500;
+}
+.step .sub {
+  font-size: 12px;
+  color: var(--ink-3);
+}
+.step:not(:last-child) .dot::before {
+  content: '';
+  position: absolute;
+  top: 28px;
+  left: 11px;
+  width: 2px;
+  height: 26px;
+  background: var(--line);
+}
+.step.done:not(:last-child) .dot::before {
+  background: var(--up);
+}
+.step.warn .dot {
+  background: var(--danger, #c0392b);
+  border-color: var(--danger, #c0392b);
+  color: #fff;
+}
+
+.src {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+.src button {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px;
+  border-radius: 14px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  text-align: left;
+  transition:
+    border-color 0.2s,
+    transform 0.15s;
+}
+.src button:hover {
+  border-color: var(--accent);
+}
+.src button:active {
+  transform: scale(0.98);
+}
+.src button[aria-pressed='true'] {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+.coin {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-weight: 700;
+  font-size: 12px;
+  color: #fff;
+}
+
+/* Send's recent-recipients row (wallet spec §4.3): a horizontal scroll of
+   chips, each an avatar over a label. Not `.chip` — a chip carries status
+   (design §3); this taps to fill a field, so it is a plain button (or a link,
+   for "+ New") with a `.coin` avatar sized down for the row. */
+.recips {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  padding: 4px 0 8px;
+}
+.recips button,
+.recips a {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  color: var(--ink-2);
+  text-decoration: none;
+  min-width: 44px;
+  min-height: 44px;
+  justify-content: center;
+}
+.recips .coin {
+  width: 40px;
+  height: 40px;
+  font-size: 11px;
+}
+.addr {
+  font-size: 12px;
+  word-break: break-all;
+  background: var(--surface-2);
+  padding: 10px;
+  border-radius: 10px;
+  text-align: center;
+}
+
+/*
+ * Token icon (mockup `.tok`): a rounded square with the two-letter fallback,
+ * distinct from `.coin`'s circular avatar (Send/Swap keep `.coin`; rows, chips and
+ * the market list use `.tok`). `TokenIcon` in `components.tsx` renders it.
+ */
+.tok {
+  width: 40px;
+  height: 40px;
+  border-radius: 14px;
+  display: grid;
+  place-items: center;
+  font-weight: 700;
+  font-size: 12.5px;
+  letter-spacing: -0.02em;
+  flex: none;
+  color: #fff;
+}
+.tok.sm {
+  width: 24px;
+  height: 24px;
+  border-radius: 8px;
+  font-size: 9px;
+}
+.tok.xs {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  font-size: 8.5px;
+}
+
+/* Pair icon (mockup `.pair-ic`): two overlapping `.tok` circles, base over quote.
+   `PairIcon` in `components.tsx` renders it. */
+.pair-ic {
+  position: relative;
+  width: 50px;
+  height: 40px;
+  flex: none;
+}
+.pair-ic .tok {
+  position: absolute;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  font-size: 10.5px;
+  box-shadow: 0 0 0 3px var(--surface);
+}
+.pair-ic .tok:first-child {
+  left: 0;
+  top: 0;
+}
+.pair-ic .tok:last-child {
+  right: 0;
+  bottom: 0;
+}
+
+/*
+ * Deposit list (mockup `.dep`): one row per pending/settled deposit — amount and
+ * token, a right-aligned status stack, and an optional reason line underneath the
+ * status. Composed by the Add money screen from its own real deposit data; only
+ * the CSS contract lives here.
+ *
+ *   <ul class="deps">
+ *     <li class="dep">
+ *       <div><b>1.19 USDC</b><div class="d">From Solana · 23m ago</div></div>
+ *       <div class="st"><span class="chip ok">Delivered</span><span class="why">View on Monad</span></div>
+ *     </li>
+ *   </ul>
+ */
+.deps {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.dep {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 12px;
+  padding: 14px 0;
+  border-top: 1px solid var(--line);
+  align-items: start;
+}
+.dep:first-child {
+  border-top: 0;
+  padding-top: 0;
+}
+.dep b {
+  font-weight: 600;
+  font-size: 15px;
+}
+.dep .d {
+  font-size: 12.5px;
+  color: var(--ink-3);
+  margin-top: 2px;
+}
+.dep .st {
+  text-align: right;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+}
+.dep .why {
+  font-size: 12.5px;
+  color: var(--ink-3);
+  max-width: 220px;
+  text-align: right;
+}
+
+/* ---------- toast, sheet ---------- */
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: calc(28px + env(safe-area-inset-bottom, 0px) + var(--toast-lift, 0px));
+  transform: translate(-50%, 20px);
+  opacity: 0;
+  background: var(--ink);
+  color: var(--bg);
+  padding: 12px 18px;
+  border-radius: var(--r-pill);
+  font-size: 14px;
+  font-weight: 600;
+  pointer-events: none;
+  transition: all 0.3s var(--ease);
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  max-width: calc(100% - 32px);
+  z-index: 40;
+}
+.toast.show {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+/* Clears the fixed mobile tab bar. A page that adds its own sticky bottom bar
+   (e.g. Trade's `.trade-bar`) sets `--toast-lift` on a wrapping element to clear
+   that too — see design/REDESIGN-FOUNDATION.md. */
+@media (max-width: 720px) {
+  .toast {
+    bottom: calc(76px + env(safe-area-inset-bottom, 0px) + var(--toast-lift, 0px));
+  }
+}
+
+.sheet {
+  position: fixed;
+  inset: 0;
+  background: var(--scrim);
+  display: grid;
+  place-items: end center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s;
+  z-index: 50;
+}
+.sheet.show {
+  opacity: 1;
+  pointer-events: auto;
+}
+.sheet .panel {
+  width: 100%;
+  background: var(--surface);
+  border-radius: 24px 24px 0 0;
+  /* Bottom padding clears the tab bar AND the iOS home indicator. The sheet sits above
+     the tab bar in z-order, so without this the last row of a long detail view is
+     under the nav and unreadable on exactly the device it matters on. */
+  padding: 14px 20px calc(34px + 76px + env(safe-area-inset-bottom));
+  transform: translateY(30px);
+  transition: transform 0.3s var(--ease);
+  /* A detail view can be longer than a phone. Scroll inside the panel, never the page
+     behind it. */
+  max-height: 88vh;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  touch-action: pan-y;
+}
+.sheet .panel:focus {
+  outline: none;
+}
+/* The swipe-down affordance. Present on mobile only: on desktop the sheet is a centred
+   dialog and there is nothing to swipe. */
+.sheet .grabber {
+  width: 40px;
+  height: 4px;
+  border-radius: 999px;
+  background: var(--line);
+  margin: 0 auto 14px;
+}
+.sheet.show .panel {
+  transform: none;
+}
+/*
+ * Desktop: a right-side slide-in drawer rather than a centred dialog (redesign,
+ * matching design/tradepro-redesign.html's `.drawer`) — same `Sheet` component,
+ * same `open`/`onClose` contract, only the desktop tier of this rule changes.
+ */
+@media (min-width: 960px) {
+  .sheet {
+    place-items: stretch end;
+  }
+  .sheet .panel {
+    width: min(420px, 100%);
+    max-width: 420px;
+    height: 100%;
+    border-radius: 0;
+    padding: calc(28px + env(safe-area-inset-top, 0px)) 28px calc(28px + env(safe-area-inset-bottom, 0px));
+    max-height: none;
+    transform: translateX(100%);
+    transition: transform 0.45s var(--ease);
+  }
+  .sheet.show .panel {
+    transform: none;
+  }
+  .sheet .grabber {
+    display: none;
+  }
+  .amount {
+    font-size: 64px;
+  }
+}
+
+/*
+ * The recovery phrase: three columns, eight rows, blurred until an explicit tap
+ * (design §5.6 and its 2026-09-02 correction to twenty-four words).
+ *
+ * `user-select: none` while blurred is the difference between a blur that hides the
+ * phrase and one that only looks like it does — the words are in the DOM either way,
+ * and a drag-select over a blurred grid would otherwise copy them out intact.
+ */
+.words {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  filter: blur(6px);
+  user-select: none;
+  -webkit-user-select: none;
+  transition: filter 0.5s var(--ease);
+}
+.words.reveal {
+  filter: none;
+  user-select: text;
+  -webkit-user-select: text;
+}
+.words span {
+  padding: 8px 10px;
+  border-radius: 10px;
+  background: var(--surface-2);
+  font-size: 13px;
+}
+.words span i {
+  color: var(--ink-3);
+  font-style: normal;
+  margin-right: 6px;
+}
+
+.install {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: var(--surface);
+  border: 1px dashed var(--line);
+}
+/* The same mark as the home-screen icon, so the banner shows what you would get. */
+.install .ic {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: var(--accent);
+  color: #fff;
+  display: grid;
+  place-items: center;
+}
+.install .ic svg {
+  width: 20px;
+  height: 20px;
+}
+
+svg.i {
+  width: 20px;
+  height: 20px;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+th {
+  text-align: left;
+  color: var(--ink-3);
+  font-weight: 500;
+  padding: 8px 6px;
+  border-bottom: 1px solid var(--line);
+}
+td {
+  padding: 8px 6px;
+  border-bottom: 1px solid var(--line);
+}
+
+.trend {
+  display: flex;
+  align-items: flex-end;
+  gap: 3px;
+  height: 60px;
+}
+.trend i {
+  flex: 1;
+  background: var(--accent);
+  opacity: 0.7;
+  border-radius: 3px 3px 0 0;
+  transform-origin: bottom;
+  transition: transform 0.5s var(--ease);
+}
+
+/* ---------- layout ---------- */
+/* The mockup's main column: 1240px, content left aligned inside it, the same
+   gutters as the top bar so page edges line up with the logo. */
+.page {
+  padding: 18px 20px 96px;
+  display: grid;
+  gap: 14px;
+  max-width: 1240px;
+  width: 100%;
+  margin: 0 auto;
+}
+@media (min-width: 960px) {
+  .page {
+    padding: 36px 28px 24px;
+  }
+}
+/* A grid item's default min-width is its content, so one wide child (a filter row
+   that should scroll inside itself, a long segmented label) stretched the whole
+   page past a phone's width. Every page column may shrink to the viewport. */
+.page > *,
+.page .grid > *,
+.page [class*='-grid'] > * {
+  min-width: 0;
+}
+
+/*
+ * ---------- app shell: a sticky top bar at every width, a fixed bottom tab bar on
+ * phone (redesign; was a left rail — see design/REDESIGN-FOUNDATION.md) ----------
+ */
+.shell {
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: block;
+}
+.shell > main {
+  min-width: 0;
+}
+
+.topbar {
+  position: sticky;
+  top: env(safe-area-inset-top, 0px);
+  z-index: 20;
+  /* Opaque, not translucent (D202): the history list's own text was showing through
+     while scrolling underneath it. No blur needed once nothing shows through it. */
+  background: var(--bg);
+  border-bottom: 1px solid var(--line);
+}
+.topbar-inner {
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 14px 28px;
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+.topbar .logo {
+  display: inline-flex;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 21px;
+  letter-spacing: -0.03em;
+  text-decoration: none;
+  color: var(--ink);
+  flex: none;
+}
+.topbar .logo span {
+  color: var(--trade);
+}
+.topbar-nav {
+  display: flex;
+  gap: 4px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  flex: 1;
+  min-width: 0;
+}
+.topbar-nav::-webkit-scrollbar {
+  display: none;
+}
+.topbar-nav a {
+  text-decoration: none;
+  color: var(--ink-2);
+  padding: 8px 14px;
+  border-radius: var(--r-pill);
+  white-space: nowrap;
+  font-weight: 500;
+  font-size: 14px;
+  transition:
+    color 0.2s,
+    background 0.2s;
+}
+.topbar-nav a:hover {
+  color: var(--ink);
+}
+.topbar-nav a[aria-current='page'] {
+  background: var(--surface-2);
+  color: var(--ink);
+}
+.topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: none;
+  margin-left: auto;
+}
+
+.tabbar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 30;
+  display: grid;
+  padding: 6px 6px calc(6px + env(safe-area-inset-bottom, 0px));
+  background: color-mix(in srgb, var(--surface) 90%, transparent);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-top: 1px solid var(--line);
+}
+.tabbar a,
+.tabbar button {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--ink-3);
+  padding: 6px 4px;
+  min-width: 44px;
+  min-height: 44px;
+  text-decoration: none;
+  transition:
+    color 0.25s,
+    transform 0.15s var(--ease);
+}
+.tabbar a[aria-current='page'],
+.tabbar button[aria-current='page'] {
+  color: var(--trade);
+}
+.tabbar a:active svg,
+.tabbar button:active svg {
+  transform: scale(0.88);
+}
+.tab-pill {
+  position: absolute;
+  top: 4px;
+  bottom: 4px;
+  border-radius: var(--r-pill);
+  background: color-mix(in srgb, var(--trade) 16%, transparent);
+  transition: transform 0.45s var(--ease);
+  pointer-events: none;
+}
+
+/* Unread count on a nav entry. Anchored to the icon rather than the tab, so it sits
+   in the same place in the top bar and in the tab bar without either laying out wider. */
+.navicon {
+  position: relative;
+  display: inline-flex;
+}
+.navbadge {
+  position: absolute;
+  top: -5px;
+  right: -8px;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  border-radius: 999px;
+  background: var(--accent);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 600;
+  line-height: 16px;
+  text-align: center;
+}
+
+/* Free-actions meter, top bar (mockup `.meter-pill`): a small ring plus the count.
+   The suffix text and the account pill hide under 720px — the ring and the number
+   stay, matching the mockup's own mobile rule exactly. */
+.meter-pill {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px 6px 7px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-pill);
+  color: var(--ink-2);
+  font-size: 13px;
+}
+.meter-pill b {
+  color: var(--ink);
+  font-weight: 600;
+}
+.meter-pill.alert {
+  border-color: color-mix(in srgb, var(--down) 45%, var(--line));
+}
+.meter-pill.alert b {
+  color: var(--down);
+}
+.meter-ring circle {
+  fill: none;
+  stroke-width: 3;
+}
+.meter-ring .track {
+  stroke: var(--line);
+}
+.meter-ring .fill {
+  stroke: var(--ok);
+  stroke-linecap: round;
+  transition: stroke-dashoffset 1.3s var(--ease);
+}
+.meter-pill.alert .meter-ring .fill {
+  stroke: var(--down);
+}
+
+.acct {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 8px 7px 14px;
+  background: var(--surface-2);
+  border-radius: var(--r-pill);
+  font-size: 13px;
+}
+.acct .addr {
+  font-variant-numeric: tabular-nums;
+}
+
+.theme-btn {
+  position: relative;
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  background: var(--surface-2);
+  color: var(--ink);
+  flex: none;
+}
+.theme-btn:hover {
+  background: var(--line);
+}
+
+@media (max-width: 720px) {
+  .topbar-inner {
+    padding: 10px 16px;
+    gap: 10px;
+    height: 60px;
+  }
+  .topbar-nav {
+    display: none;
+  }
+  .acct {
+    display: none;
+  }
+  .meter-pill {
+    border: 0;
+    background: transparent;
+    padding: 6px 4px 6px 2px;
+  }
+  .meter-pill .txt {
+    display: none;
+  }
+}
+@media (min-width: 721px) {
+  .tabbar {
+    display: none;
+  }
+}
+
+/* App-wide footer (design §4: relayer/venue status). Its content is repeated in
+   the mobile "More" sheet (redesign PWA spec), so the bar itself is desktop only —
+   matching the mockup's own `footer{display:none}` under 720px. */
+.appfooter {
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 20px 28px 28px;
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+  align-items: center;
+  color: var(--ink-3);
+  font-size: 12.5px;
+}
+@media (max-width: 720px) {
+  .appfooter {
+    display: none;
+  }
+}
+.footer-status {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+  align-items: center;
+  color: var(--ink-3);
+  font-size: 12.5px;
+}
+.footer-status .live {
+  color: var(--up);
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.footer-status .live::before {
+  content: '';
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--up);
+  animation: footer-live-pulse 2s infinite;
+}
+@keyframes footer-live-pulse {
+  0% {
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--up) 60%, transparent);
+  }
+  70% {
+    box-shadow: 0 0 0 8px transparent;
+  }
+  100% {
+    box-shadow: 0 0 0 0 transparent;
+  }
+}
+
+/* ---------- onboard (design §5.1) ---------- */
+.onboard {
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: grid;
+  align-content: space-between;
+  gap: 24px;
+  padding: 40px 24px;
+  max-width: 520px;
+  margin: 0 auto;
+  width: 100%;
+}
+.wordmark {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 22px;
+}
+.onboard h1 {
+  font-size: 40px;
+  margin-top: 40px;
+}
+@media (min-width: 960px) {
+  .onboard {
+    padding: 80px 32px;
+  }
+  .onboard h1 {
+    font-size: 48px;
+  }
+}
+
+/* ---------- empty / loading ---------- */
+.empty {
+  padding: 14px 4px;
+  color: var(--ink-3);
+  font-size: 13px;
+  line-height: 1.5;
+}
+.skel {
+  display: block;
+  border-radius: 8px;
+  background: var(--surface-2);
+  height: 14px;
+}
+.skel + .skel {
+  margin-top: 8px;
+}
+.book.loading .lvl,
+.book.loading .side {
+  min-height: 22px;
+}
+
+/* Two-column trade layout on desktop (design §4). */
+.split {
+  display: grid;
+  gap: 14px;
+  align-items: start;
+}
+@media (min-width: 960px) {
+  .split {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+
+/*
+ * Activity (design §5.7, added 2026-09-09).
+ *
+ * The same rows twice — a table and a stack — with CSS choosing which is visible. Both
+ * are in the DOM so there is no width measurement in JS and no flash on first paint,
+ * and they cannot disagree because they render the same array.
+ */
+.act-table {
+  display: none;
+}
+.act-stack {
+  display: block;
+}
+.act-item {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  grid-template-areas:
+    'main status'
+    'sub status';
+  gap: 2px 12px;
+  width: 100%;
+  text-align: left;
+  padding: 14px 4px;
+  background: none;
+  border: 0;
+  border-bottom: 1px solid var(--line);
+  cursor: pointer;
+  align-items: center;
+  min-height: 44px;
+}
+.act-item:last-child {
+  border-bottom: 0;
+}
+.act-item:active {
+  background: var(--surface-2);
+}
+.act-main {
+  grid-area: main;
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+.act-sub {
+  grid-area: sub;
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  color: var(--ink-3);
+}
+.act-status {
+  grid-area: status;
+}
+
+@media (min-width: 960px) {
+  .act-stack {
+    display: none;
+  }
+  .act-table {
+    display: table;
+    width: 100%;
+    border-collapse: collapse;
+  }
+  .act-table th {
+    text-align: left;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--ink-3);
+    padding: 8px 10px;
+    border-bottom: 1px solid var(--line);
+  }
+  .act-table td {
+    padding: 12px 10px;
+    border-bottom: 1px solid var(--line);
+    font-size: 14px;
+    vertical-align: middle;
+  }
+  .act-table tbody tr {
+    cursor: pointer;
+  }
+  .act-table tbody tr:hover {
+    background: var(--surface-2);
+  }
+  .act-table tbody tr:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: -2px;
+  }
+  .act-table td.num {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+  }
+  .act-table th:nth-child(2) {
+    text-align: right;
+  }
+}
+
+/* Filter chips. A pressed chip is the current filter, not a decoration. */
+.filters {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 10px;
+}
+.filters button {
+  border: 1px solid var(--line);
+  background: none;
+  color: var(--ink-2);
+  border-radius: 999px;
+  padding: 7px 14px;
+  font-size: 13px;
+  cursor: pointer;
+  min-height: 36px;
+}
+.filters button[aria-pressed='true'] {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+
+
+/* Percentage selector under the ticket's amount field (item 3, 2026-09-10). */
+.pcts {
+  display: flex;
+  gap: 8px;
+}
+.pcts button {
+  flex: 1;
+  border: 1px solid var(--line);
+  background: none;
+  color: var(--ink-2);
+  border-radius: 10px;
+  padding: 8px 0;
+  font-size: 13px;
+  cursor: pointer;
+  min-height: 40px;
+  transition: background 0.15s var(--ease);
+}
+.pcts button:hover:not(:disabled) {
+  background: var(--surface-2);
+}
+.pcts button:active:not(:disabled) {
+  transform: scale(0.96);
+}
+.pcts button:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+/* ---------- toggle switch (design §7: aria-pressed on toggles) ---------- */
+.toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+  color: var(--ink-2);
+  min-height: 44px;
+  padding: 4px 0;
+}
+.toggle i {
+  width: 38px;
+  height: 22px;
+  border-radius: 11px;
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  position: relative;
+  flex: 0 0 auto;
+  transition:
+    background 0.2s var(--ease),
+    border-color 0.2s var(--ease);
+}
+.toggle i::after {
+  content: '';
+  position: absolute;
+  top: 1px;
+  left: 1px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
+  transition: left 0.2s var(--ease);
+}
+.toggle[aria-pressed='true'] i {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+.toggle[aria-pressed='true'] i::after {
+  left: 17px;
+}
+.toggle:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+/* ---------- back link (wallet sub-views always link home, spec §2) ---------- */
+.back {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--ink-2);
+  font-weight: 600;
+  font-size: 14px;
+  min-height: 44px;
+  text-decoration: none;
+}
+.back:hover {
+  color: var(--ink);
+}
+
+/*
+ * `.apphead` (a mobile-only header row above the page, separate from the rail) is
+ * retired by this redesign: the unified `.topbar` above now renders at every
+ * width, compact under 720px, so there is no second header left to style. Kept out
+ * entirely rather than left as dead CSS — nothing in `shell.tsx` renders it any
+ * more.
+ */
+
+/* ---------- swap side blocks: token first, then the amount (v2.1 spec 2.1) ---------- */
+.side {
+  background: var(--surface-2);
+  border-radius: 16px;
+  padding: 12px;
+  border: 2px solid transparent;
+  transition: border-color 0.2s;
+}
+.side.focus {
+  border-color: var(--accent-soft);
+}
+.side .lab {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: var(--ink-3);
+  margin-bottom: 8px;
+}
+.tokbtn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  transition: transform 0.15s var(--ease);
+}
+.tokbtn:active {
+  transform: scale(0.99);
+}
+.tokbtn .sym {
+  font-weight: 600;
+}
+.tokbtn .nm {
+  font-size: 12px;
+  color: var(--ink-3);
+}
+.tokbtn .bal {
+  margin-left: auto;
+  text-align: right;
+  font-size: 12px;
+  color: var(--ink-3);
+}
+.tokbtn .bal b {
+  display: block;
+  color: var(--ink);
+  font-size: 13px;
+}
+.tokbtn .chev {
+  margin-left: 8px;
+  color: var(--ink-3);
+}
+.side .amt {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+}
+.side .amt input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-size: 30px;
+  font-family: var(--font-display);
+  font-weight: 600;
+  color: var(--ink);
+  outline: none;
+  padding: 4px 2px;
+}
+.side .amt .usd {
+  font-size: 13px;
+  color: var(--ink-3);
+  white-space: nowrap;
+}
+.deliver {
+  font-size: 12px;
+  color: var(--ink-2);
+  margin-top: 8px;
+  padding: 8px 10px;
+  background: var(--surface);
+  border-radius: 10px;
+}
+/* the quote's price-hold draining bar */
+.ttl {
+  display: inline-block;
+  width: 90px;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--surface-2);
+  overflow: hidden;
+  vertical-align: middle;
+  margin-left: 8px;
+}
+.ttl i {
+  display: block;
+  height: 100%;
+  background: var(--accent);
+  transition: width 1s linear;
+}
+
+/* ---------- token selector rows (v2.1 spec 2.2) ---------- */
+.trow {
+  display: grid;
+  grid-template-columns: 34px 1fr auto;
+  gap: 12px;
+  align-items: center;
+  width: 100%;
+  padding: 10px 8px;
+  border-radius: 12px;
+}
+.trow:hover {
+  background: var(--surface-2);
+}
+.trow .t {
+  font-weight: 600;
+}
+.trow .s {
+  font-size: 12px;
+  color: var(--ink-3);
+}
+
+/* ---------- free-actions counter (gas spec B4): rail slot and banner ---------- */
+.railcounter {
+  padding: 0 14px 10px;
+}
+/* The 18-used banner blinks (gas spec B4's own words: "a thin blinking banner").
+   The one sanctioned exception to the no-animation rule — the newer gas spec
+   outranks the design system's motion table for this element alone. */
+@keyframes freeactions-blink {
+  0%,
+  55% {
+    opacity: 1;
+  }
+  70%,
+  85% {
+    opacity: 0.45;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+.blink {
+  animation: freeactions-blink 1.6s var(--ease) infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .blink {
+    animation: none;
+  }
+}
+
+/* ---------- ripple: green wash on a balance change (wallet spec §7) ---------- */
+.ripple {
+  position: absolute;
+  right: -40px;
+  top: -40px;
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  background: var(--up-soft);
+  opacity: 0;
+  pointer-events: none;
+}
+.ripple.go {
+  animation: ripple 0.9s var(--ease);
+}
+@keyframes ripple {
+  0% {
+    transform: scale(0.2);
+    opacity: 0.9;
+  }
+  100% {
+    transform: scale(6);
+    opacity: 0;
+  }
+}
+
+/* ---------- row disclosure: expand in place with a height ease (wallet spec §7) ---------- */
+.disc {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.26s var(--ease);
+}
+.disc.open {
+  grid-template-rows: 1fr;
+}
+.disc > div {
+  overflow: hidden;
+}
+
+/* One-time flash on an affected row (wallet spec §7). Separate from `.order.enter`:
+   a holdings row flashes in place without sliding in. */
+.row.flash {
+  animation: rowflash 1.1s var(--ease);
+}
+@keyframes rowflash {
+  0% {
+    background: var(--accent-soft);
+  }
+  100% {
+    background: transparent;
+  }
+}
+
+/* ---------- flying token chip (wallet spec §7): offset-path, with a plain fallback ---------- */
+.fly {
+  position: absolute;
+  z-index: 20;
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  font-weight: 600;
+  font-size: 13px;
+  color: var(--ink);
+}
+.fly.animated {
+  animation: fly 0.9s var(--ease) forwards;
+}
+.fly.fallback {
+  animation: flyfallback 0.9s var(--ease) forwards;
+}
+@keyframes fly {
+  0% {
+    offset-distance: 0%;
+    opacity: 0;
+    transform: scale(0.7);
+  }
+  10% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  90% {
+    opacity: 1;
+  }
+  100% {
+    offset-distance: 100%;
+    opacity: 0;
+    transform: scale(0.8);
+  }
+}
+@keyframes flyfallback {
+  0% {
+    opacity: 0;
+    transform: scale(0.7);
+  }
+  15% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  85% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+}
+
+/* ---------- confetti dot burst on a receiving element (wallet spec §7) ---------- */
+.dot2 {
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  pointer-events: none;
+  animation: dotpop 0.7s var(--ease) forwards;
+}
+@keyframes dotpop {
+  0% {
+    transform: translate(0, 0);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(var(--dx), var(--dy)) scale(0.2);
+    opacity: 0;
+  }
+}
+
+/* ---------- Wallet home: hero split, address chip, free-actions ring (spec §4.1) ---------- */
+.hero .split {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-top: 12px;
+}
+.hero .split > div {
+  background: rgba(255, 255, 255, 0.45);
+  border-radius: 12px;
+  padding: 9px 11px;
+}
+[data-theme='dark'] .hero .split > div {
+  background: rgba(255, 255, 255, 0.06);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) .hero .split > div {
+    background: rgba(255, 255, 255, 0.06);
+  }
+}
+.hero .split .k {
+  font-size: 12px;
+  color: var(--ink-2);
+}
+.hero .split .n {
+  font-weight: 600;
+  font-size: 16px;
+  margin-top: 2px;
+}
+/* The split legend's two figures (Trading balance, Wallet) had no currency marker
+   while the hero total above them does (`.amount .cur`) — same marker, scaled to
+   this compact context instead of the hero's 22px. */
+.hero .split .n .cur {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--ink-2);
+  margin-right: 4px;
+}
+.hero .addr {
+  margin-top: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--ink-2);
+}
+.hero .addr code {
+  font-family: inherit;
+  background: rgba(0, 0, 0, 0.05);
+  padding: 3px 9px;
+  border-radius: 8px;
+  color: var(--ink);
+}
+[data-theme='dark'] .hero .addr code {
+  background: rgba(255, 255, 255, 0.06);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) .hero .addr code {
+    background: rgba(255, 255, 255, 0.06);
+  }
+}
+/* The free-actions ring, reading the relayer ledger — reserved space, never drawn
+   at 0/20 when `freeActions` has not loaded (see WalletHome). */
+.ring {
+  position: absolute;
+  right: 16px;
+  top: 16px;
+  width: 46px;
+  height: 46px;
+}
+.ring circle {
+  fill: none;
+  stroke-width: 4;
+}
+.ring .bg {
+  stroke: rgba(0, 0, 0, 0.08);
+}
+[data-theme='dark'] .ring .bg {
+  stroke: rgba(255, 255, 255, 0.1);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) .ring .bg {
+    stroke: rgba(255, 255, 255, 0.1);
+  }
+}
+.ring .fg {
+  stroke: var(--accent);
+  stroke-linecap: round;
+  transform: rotate(-90deg);
+  transform-origin: 50% 50%;
+  transition: stroke-dashoffset 0.8s var(--ease);
+}
+.ring text {
+  font: 600 11px var(--font-ui);
+  fill: var(--ink);
+}
+
+/* ---------- Wallet home: the four-verb action row (spec §4.1) ---------- */
+.actions {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+}
+.actions button,
+.actions a {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 12px 6px;
+  border-radius: 16px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ink);
+  min-height: 44px;
+  text-decoration: none;
+  transition: transform 0.15s var(--ease);
+}
+.actions button:active:not(:disabled),
+.actions a:active {
+  transform: scale(0.96);
+}
+.actions button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.actions .ic {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  color: var(--accent);
+  background: var(--accent-soft);
+}
+.actions .ic.up {
+  color: var(--up);
+  background: var(--up-soft);
+}
+.actions .ic.down {
+  color: var(--down);
+  background: var(--down-soft);
+}
+.actions .ic.warn {
+  color: var(--warn);
+  background: var(--warn-soft);
+}
+.actions .s {
+  font-size: 10px;
+  color: var(--ink-3);
+  font-weight: 400;
+  margin-top: -4px;
+}
+
+/* ---------- Wallet home: holdings rows, each with an in-place Disclosure under it.
+   `.card > .row`'s margin and `.row + .row`'s divider both require `.row` to be a
+   direct child of `.card`, which a row wrapped with its own Disclosure cannot be —
+   restated here against the wrapper instead (spec §4.1: rows expand in place). ---------- */
+.holdings-rows > div + div {
+  border-top: 1px solid var(--line);
+}
+.holdings-rows .row {
+  margin: 0 -6px;
+  border-top: 0;
+}
+
+/* ---------- Wallet home: the Waiting card (spec §4.1, §5.4) ---------- */
+.waiting {
+  position: relative;
+  overflow: hidden;
+  background: var(--warn-soft);
+  border-radius: 16px;
+  padding: 14px 16px;
+}
+.waiting .row2 {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+
+/* ---------- Move sheet: the direction toggle (spec §4.5) ---------- */
+.dir {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+.dir button {
+  padding: 10px;
+  border-radius: 12px;
+  border: 2px solid var(--line);
+  font-weight: 600;
+  font-size: 13px;
+  text-align: center;
+  min-height: 44px;
+}
+.dir button[aria-pressed='true'] {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+  color: var(--accent);
+}

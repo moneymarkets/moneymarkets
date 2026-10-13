@@ -1,0 +1,33 @@
+/*
+ * `/home` page-scoped layout. Desktop default (not a media override — this file
+ * follows the same desktop-base convention as `trade.css`): Add money and Trade
+ * sit beside the "Available to trade" figure, as in the mockup's `.home-hero`
+ * (`grid-template-columns:1fr auto`). Under 720px, or running installed
+ * (`display-mode: standalone`), they drop back to the existing full-width,
+ * side-by-side pair below the figure.
+ */
+.pg-home .hero-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 24px 32px;
+  align-items: end;
+}
+.pg-home .hero-btns {
+  display: flex;
+  gap: 10px;
+}
+.pg-home .hero-btns .btn {
+  flex: 0 0 auto;
+}
+
+@media (max-width: 719px), (display-mode: standalone) {
+  .pg-home .hero-row {
+    display: block;
+  }
+  .pg-home .hero-btns {
+    margin-top: 18px;
+  }
+  .pg-home .hero-btns .btn {
+    flex: 1 1 0%;
+  }
+}

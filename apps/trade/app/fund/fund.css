@@ -1,0 +1,108 @@
+/*
+ * Add money (`/fund`) — page-scoped layout only.
+ *
+ * Every selector here is prefixed `.pg-fund` so nothing in this file can reach another
+ * screen. Appearance of every component it places — `.card`, `.btn`, `.chip`, `.seg`,
+ * `.field`, `.notice`, `.steps`/`.step`, `.deps`/`.dep`, `.addr` — comes from
+ * `packages/ui/src/tokens.css`; this file is layout, not a second design system.
+ *
+ * Two-column grid (left: the three methods, right: refunds + recent deposits),
+ * matching design/tradepro-redesign.html's "Add money" and
+ * design/REDESIGN-FOUNDATION.md's breakpoints: 1000px collapses the grid to one
+ * column, 720px is where the method tabs go full width and the QR/address centre.
+ */
+
+.pg-fund-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
+  gap: 16px;
+  align-items: start;
+}
+
+.pg-fund-left {
+  position: sticky;
+  top: calc(env(safe-area-inset-top, 0px) + 86px);
+}
+
+.pg-fund-right {
+  gap: 16px;
+}
+
+/*
+ * One method's content. All three stay mounted at all times — only `display` toggles
+ * with the segmented control above them — so every live read, poll and subscription
+ * a method owns (the balance watch behind the QR card, the bridge-coverage fetch, the
+ * permit preflight, the cross-tab "move this" listener) keeps running under whichever
+ * tab is hidden, exactly as it did when every method sat on one long page at once.
+ */
+.pg-fund-method {
+  display: none;
+}
+.pg-fund-method.on {
+  display: block;
+  margin-top: 18px;
+}
+
+/* "Send on Monad": QR beside the address and its actions. */
+.pg-fund-recv {
+  display: flex;
+  gap: 18px;
+  align-items: flex-start;
+  flex-wrap: wrap;
+}
+.pg-fund-recv-addr {
+  min-width: 220px;
+  flex: 1 1 260px;
+}
+
+/* The numbered "From another chain" steps reuse `.steps`/`.step`; a step whose
+   precondition is not yet met (no asset chosen, no chain chosen) is shown, dimmed,
+   rather than removed — the mockup's "locked" treatment — since every step here is a
+   phase the user moves through, not a feature that may or may not exist. */
+.pg-fund-steps .step.locked {
+  opacity: 0.5;
+}
+.pg-fund-steps .step .sub {
+  display: block;
+  margin-top: 6px;
+}
+
+@media (max-width: 1000px) {
+  .pg-fund-grid {
+    grid-template-columns: 1fr;
+  }
+  /* The grid is one column here, so the left panel and the right column share the
+     same scroll — a sticky left panel would ride over the right column's content
+     instead of clearing it, so sticking stops exactly where the two-column layout
+     does. */
+  .pg-fund-left {
+    position: static;
+    top: auto;
+  }
+}
+
+@media (max-width: 720px) {
+  .pg-fund-recv {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+  .pg-fund-recv-addr {
+    width: 100%;
+  }
+  .pg-fund-recv-addr .addr {
+    text-align: center;
+  }
+  .pg-fund-recv-addr .between {
+    justify-content: center;
+  }
+}
+
+/* Phone width: the three method labels wrap instead of widening the page. */
+@media (max-width: 720px) {
+  .pg-fund .seg button {
+    white-space: normal;
+    line-height: 1.2;
+    min-width: 0;
+  }
+}

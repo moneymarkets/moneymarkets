@@ -1,0 +1,13 @@
+{
+  "recordedAt": "2026-09-30",
+  "request": {
+    "method": "POST",
+    "url": "https://api.relay.link/transactions/deposit-address/reindex",
+    "body": {
+      "chainId": 8453,
+      "depositAddress": "0x83ae43810f754542d940aaa0fb8ad096fd00115c"
+    }
+  },
+  "httpStatus": 200,
+  "body": "{\"message\":\"No balances found\",\"triggeredCurrencies\":[],\"checkedCurrencies\":6,\"failedCurrencies\":0}"
+}

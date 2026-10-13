@@ -1,0 +1,278 @@
+/*
+ * Trade screen reskin (visual only — design/06-design-prototype.html's trade-head /
+ * trade-grid / ticket / mbar sections, matched where the live app has the data for
+ * it). Every selector is scoped under `.pg-trade` so nothing here can leak onto
+ * another screen.
+ *
+ * Tokens, the class contracts (`.card .btn .chip .seg .field .notice .book .lvl
+ * .state .sheet`) and the shared `.split` two-column grid all come from
+ * `packages/ui/src/tokens.css` — not edited here. This file only adds what that
+ * shared layer does not cover: the market-picker trigger and its dropdown, the
+ * header's mid/spread tiles, the book's vertical stacking (same `.book`/`.side`/
+ * `.lvl` markup, restacked), the sticky desktop ticket column, and the mobile trade
+ * bar plus its bottom-sheet ticket.
+ */
+
+/* ---------- header row (design: .trade-head) ---------- */
+.pg-trade .trade-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 14px 24px;
+  padding: 2px 2px 4px;
+}
+
+.pg-trade .pair-wrap {
+  position: relative;
+}
+
+.pg-trade .pair-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  padding: 6px 14px 6px 6px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-card);
+  background: var(--surface);
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  text-align: left;
+  transition: border-color 0.2s var(--ease);
+}
+.pg-trade .pair-btn:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+.pg-trade .pair-btn .t {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.25;
+}
+.pg-trade .pair-btn .t b {
+  font-family: var(--font-display);
+  font-size: 17px;
+  font-weight: 600;
+}
+.pg-trade .pair-btn .t span {
+  font-size: 12.5px;
+  color: var(--ink-3);
+}
+.pg-trade .pair-btn .cv {
+  margin-left: 2px;
+  color: var(--ink-3);
+  transition: transform 0.25s var(--ease);
+  flex: none;
+}
+.pg-trade .pair-btn[aria-expanded='true'] .cv {
+  transform: rotate(180deg);
+}
+
+.pg-trade .tick {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
+}
+.pg-trade .tick b {
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 600;
+}
+.pg-trade .tick span {
+  font-size: 12px;
+  color: var(--ink-3);
+}
+
+.pg-trade .live-info {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+  margin-left: auto;
+  text-align: right;
+}
+
+/* ---------- market picker: inline dropdown (desktop) ---------- */
+.pg-trade .pair-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  z-index: 20;
+  min-width: 270px;
+  max-height: 60vh;
+  overflow-y: auto;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-card);
+  padding: 6px;
+  display: none;
+}
+.pg-trade .pair-menu.show {
+  display: block;
+}
+.pg-trade .pair-option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 44px;
+  padding: 8px 10px;
+  border: 0;
+  border-radius: var(--r-row);
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-size: 14px;
+  text-align: left;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+@media (hover: hover) {
+  .pg-trade .pair-option:hover:not(:disabled) {
+    background: var(--surface-2);
+  }
+}
+.pg-trade .pair-option[aria-selected='true'] {
+  background: var(--accent-soft);
+}
+.pg-trade .pair-option:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+/* The same option rows, inside the foundation's Sheet, for mobile — see
+   design/REDESIGN-FOUNDATION.md ("the Trade market picker also opens as a bottom
+   sheet"). CSS alone decides which of the two markup copies is visible; both read
+   the same `MARKETS` list and call the same `onSelect`. */
+.pg-trade .picker-sheet {
+  display: none;
+}
+
+@media (max-width: 719px) {
+  .pg-trade .pair-menu {
+    display: none !important;
+  }
+  .pg-trade .picker-sheet {
+    display: contents;
+  }
+}
+
+/* ---------- vertical order book ---------- */
+/* Same `.book`/`.side`/`.lvl` contract as every other screen — restacked to one
+   column (asks, mid/spread, bids) instead of bid-left/ask-right. */
+.pg-trade .book {
+  grid-template-columns: 1fr;
+}
+.pg-trade .lvl.flash {
+  animation: rowflash 0.9s var(--ease);
+}
+
+/* ---------- left column / ticket column ---------- */
+.pg-trade .trade-grid {
+  align-items: start;
+}
+.pg-trade .ticket-col {
+  position: sticky;
+  top: 86px;
+}
+.pg-trade .ticket-close {
+  display: none;
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  width: 36px;
+  height: 36px;
+  border: 0;
+  border-radius: 12px;
+  background: var(--surface-2);
+  color: inherit;
+  cursor: pointer;
+  place-items: center;
+  z-index: 1;
+}
+
+/* ---------- mobile: trade bar + ticket-as-sheet ---------- */
+.pg-trade .trade-bar {
+  display: none;
+}
+.pg-trade .scrim {
+  display: none;
+}
+
+@media (max-width: 719px), (display-mode: standalone) {
+  .pg-trade .ticket-col {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    top: auto;
+    z-index: 36;
+    max-height: 86dvh;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+    transform: translateY(110%);
+    transition: transform 0.45s var(--ease);
+  }
+  .pg-trade .ticket-col.open {
+    transform: none;
+  }
+  /* The ticket's own `.card` becomes the sheet surface; the wrapper above only
+     positions it. Same component, same fields — a rounder top edge and no hairline
+     border is all that changes. */
+  .pg-trade .ticket-col .card {
+    border-radius: 28px 28px 0 0;
+    border: 0;
+  }
+  .pg-trade .ticket-col .card > .seg:first-child {
+    margin-right: 48px;
+  }
+  .pg-trade .ticket-close {
+    display: grid;
+  }
+
+  .pg-trade .trade-bar {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: calc(64px + env(safe-area-inset-bottom, 0px));
+    z-index: 29;
+    padding: 10px 16px;
+    background: color-mix(in srgb, var(--surface) 86%, transparent);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-top: 1px solid var(--line);
+  }
+
+  .pg-trade .scrim {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 35;
+    background: var(--scrim);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s;
+  }
+  .pg-trade .scrim.show {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  /* `.toast-lift` (design/REDESIGN-FOUNDATION.md): the trade bar sits above the tab
+     bar, so a toast needs to clear both. Set on the trade bar's own wrapper. */
+  .pg-trade .trade-bar-lift {
+    --toast-lift: 64px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pg-trade .ticket-col,
+  .pg-trade .pair-btn .cv {
+    transition: none;
+  }
+}

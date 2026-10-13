@@ -1,0 +1,120 @@
+/*
+ * `/settings` page-scoped layout (design §5.6 / REDESIGN-PROMPT): a sticky section
+ * menu on the left, highlighting whichever section is in view, and the sections
+ * themselves as grouped rows in rounded panels on the right. Everything inside a
+ * section still renders through the shared `Card`/`Row`/`Toggle`/`Chip` contracts —
+ * this file only lays out the two-column shell and the "Back up" fact grid, neither
+ * of which exists anywhere else in the design system.
+ */
+.pg-settings .set-grid {
+  display: grid;
+  grid-template-columns: 200px minmax(0, 1fr);
+  gap: 32px;
+  align-items: start;
+}
+
+.pg-settings .set-nav {
+  position: sticky;
+  top: calc(90px + env(safe-area-inset-top, 0px));
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.pg-settings .set-nav a {
+  text-decoration: none;
+  color: var(--ink-2);
+  padding: 8px 14px;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 500;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  transition:
+    background 0.2s,
+    color 0.2s;
+}
+.pg-settings .set-nav a:hover {
+  color: var(--ink);
+}
+.pg-settings .set-nav a[aria-current='true'] {
+  background: var(--surface-2);
+  color: var(--ink);
+}
+
+.pg-settings .set-sec {
+  scroll-margin-top: 100px;
+}
+.pg-settings .set-sec + .set-sec {
+  margin-top: 14px;
+}
+
+.pg-settings .facts {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin: 10px 0 14px;
+}
+.pg-settings .fact {
+  padding: 14px 16px;
+  border-radius: 16px;
+  background: var(--surface-2);
+  font-size: 13px;
+  color: var(--ink-2);
+  line-height: 1.5;
+}
+.pg-settings .fact b {
+  display: block;
+  color: var(--ink);
+  font-weight: 600;
+  margin-bottom: 2px;
+  font-size: 13.5px;
+}
+
+@media (max-width: 1000px) {
+  .pg-settings .set-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  .pg-settings .set-nav {
+    position: static;
+    flex-direction: row;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .pg-settings .set-nav::-webkit-scrollbar {
+    display: none;
+  }
+  .pg-settings .set-nav a {
+    white-space: nowrap;
+  }
+}
+
+@media (max-width: 720px) {
+  .pg-settings .facts {
+    grid-template-columns: 1fr;
+  }
+  .pg-settings .set-nav {
+    position: sticky;
+    top: calc(60px + env(safe-area-inset-top, 0px));
+    z-index: 10;
+    background: color-mix(in srgb, var(--bg) 92%, transparent);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    margin: 0 -16px;
+    padding: 8px 16px;
+  }
+  .pg-settings .set-nav a {
+    flex: none;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    padding: 8px 14px;
+    min-height: 40px;
+  }
+  .pg-settings .set-nav a[aria-current='true'] {
+    border-color: transparent;
+  }
+  .pg-settings .set-sec {
+    scroll-margin-top: 112px;
+  }
+}

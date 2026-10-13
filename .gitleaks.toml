@@ -1,0 +1,49 @@
+title = "tradepro secret scan"
+
+# Rule A2.2: no private key, mnemonic or signature material in a tracked file, ever.
+#
+# A blanket `0x[0-9a-f]{64}` rule was tried first and rejected: this repo legitimately
+# contains transaction hashes, event topic hashes, ABI-encoded log words and EIP-712
+# domain separators, all of which are 32 public bytes. A scanner that fires on those
+# gets switched off, and then it catches nothing. The rules below key on *context* —
+# a 64-hex value bound to a key-shaped name, or an environment assignment — which is
+# what actually distinguishes a leaked key from a public hash.
+
+[extend]
+useDefault = true
+
+[[rules]]
+id = "key-shaped-assignment"
+description = "64-hex value assigned to a key-shaped identifier"
+regex = '''(?i)\b(private_?key|secret_?key|deployer_?key|relayer_?key|signing_?key|priv_?key|sk)\b\s*[:=]\s*['"`]?(0x)?[0-9a-fA-F]{64}\b'''
+tags = ["key", "evm"]
+
+[[rules]]
+id = "env-private-key"
+description = "environment variable carrying a private key value"
+regex = '''(?im)^\s*[A-Z0-9_]*(PRIVATE_KEY|SECRET_KEY|MNEMONIC|SEED_PHRASE)\s*=\s*['"]?\S+'''
+tags = ["key", "env"]
+[rules.allowlist]
+description = "the committed template leaves every secret blank"
+regexes = ['''(PRIVATE_KEY|SECRET_KEY|MNEMONIC|SEED_PHRASE)\s*=\s*$''']
+paths = ['''\.env\.example$''']
+
+[[rules]]
+id = "bip39-mnemonic"
+description = "12 or 24 dictionary words assigned to a mnemonic-shaped name"
+regex = '''(?i)(mnemonic|seed_?phrase|recovery_?phrase)\s*[:=]\s*['"`](?:[a-z]{3,8}\s+){11,23}[a-z]{3,8}['"`]'''
+tags = ["mnemonic"]
+
+[[rules]]
+id = "raw-signature-log"
+description = "a 65-byte signature written into source"
+regex = '''0x[0-9a-fA-F]{130}\b'''
+tags = ["signature"]
+
+[allowlist]
+description = "Vendored documentation and lockfiles"
+paths = [
+  '''pnpm-lock\.yaml''',
+  '''docs/0[1-4]-.*\.md''',
+  '''07-CLAUDE-CODE-KICKOFF-PROMPT\.md''',
+]

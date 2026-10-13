@@ -1,0 +1,11 @@
+{
+  "name": "@tradepro/mobile",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "echo \"mobile shell is Phase 4 (Wed 30 Sep) and gated on open item 12. Nothing to build yet.\"",
+    "typecheck": "echo \"no sources yet\"",
+    "test": "echo \"no tests yet\""
+  }
+}

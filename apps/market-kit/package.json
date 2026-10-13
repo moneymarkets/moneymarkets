@@ -1,0 +1,26 @@
+{
+  "name": "@tradepro/market-kit",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "bin": {
+    "kit": "./dist/cli.js"
+  },
+  "scripts": {
+    "kit": "tsx src/cli.ts",
+    "web": "tsx src/web/main.ts",
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@tradepro/core": "workspace:*",
+    "dotenv": "17.4.2",
+    "viem": "2.56.3",
+    "zod": "4.5.4"
+  },
+  "devDependencies": {
+    "tsx": "4.23.13",
+    "vitest": "4.1.11"
+  }
+}

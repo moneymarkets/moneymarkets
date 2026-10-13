@@ -1,0 +1,27 @@
+/*
+ * `/activity` page-scoped styles. Everything else the screen needs (the filter
+ * pill look, the table/stack contract, group-header rows) already lives in
+ * `@tradepro/ui/tokens.css` — this file only adds the one thing that is specific
+ * to this screen's layout: the filter row scrolling horizontally in a single line
+ * on mobile (design §5.7's own mobile rule) without changing `.filters` itself,
+ * which `/fund`'s route picker also renders and must keep wrapping.
+ */
+.pg-activity .act-filters {
+  flex-wrap: wrap;
+}
+
+@media (max-width: 720px) {
+  .pg-activity .act-filters {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    padding-bottom: 2px;
+  }
+  .pg-activity .act-filters::-webkit-scrollbar {
+    display: none;
+  }
+  .pg-activity .act-filters button {
+    flex: 0 0 auto;
+  }
+}

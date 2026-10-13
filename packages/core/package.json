@@ -1,0 +1,38 @@
+{
+  "name": "@tradepro/core",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./dist/index.js",
+    "./ws": "./dist/kuru/ws.js"
+  },
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@category-labs/mera": "0.2.0",
+    "@scure/bip39": "2.4.0",
+    "viem": "2.56.3",
+    "zod": "4.5.4"
+  },
+  "devDependencies": {
+    "@types/ws": "8.18.1",
+    "fast-check": "4.9.0",
+    "ws": "8.21.3"
+  },
+  "peerDependencies": {
+    "ws": "^8.21.3"
+  },
+  "peerDependenciesMeta": {
+    "ws": {
+      "optional": true
+    }
+  }
+}

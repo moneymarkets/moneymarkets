@@ -1,0 +1,21 @@
+{
+ "status": "PROCESSING",
+ "updatedAt": "2026-09-24T17:51:25.000Z",
+ "correlationId": "78bce6f8-a974-460a-9c9c-4ac72055ec35",
+ "swapDetails": {
+  "depositedAmount": "10000000",
+  "depositedAmountFormatted": "0.01",
+  "amountOut": null,
+  "amountOutFormatted": null,
+  "refundedAmount": "0",
+  "refundedAmountFormatted": "0",
+  "refundReason": null,
+  "originChainTxHashes": [
+   {
+    "hash": "559JmbpQtWPcWxHbTSBBqbB9Z6q9E73hNUaCjMMxTh6d5ooxVu6cCxSHYSEFYUbGnq2ttMVyZfijJNCvsbDiyu7L",
+    "explorerUrl": ""
+   }
+  ],
+  "destinationChainTxHashes": []
+ }
+}

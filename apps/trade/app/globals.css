@@ -1,0 +1,19 @@
+@import '@tradepro/ui/tokens.css';
+
+/**
+ * The QR code on the deposit card.
+ *
+ * The prototype draws `.qr` as a repeating-linear-gradient — a picture of a QR code,
+ * which is right in a prototype and a lie in an app. This is the same box around a
+ * real one: the modules are `<rect>` elements filled with `var(--ink)` on
+ * `var(--surface)`, so it inverts with the theme and stays scannable in dark mode,
+ * where a fixed black-on-black QR would not be.
+ */
+.qr {
+  width: 168px;
+  height: 168px;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  display: block;
+}

@@ -1,0 +1,70 @@
+# Envio HyperIndex - Kuru order books on Monad mainnet (chain 143).
+#
+# Spec section 9. Every event signature below is transcribed from the ABI arrays in
+# packages/core/src/abi/ (verbatim from @kuru-labs/kuru-sdk@0.0.95, selector-checked
+# against the deployed dispatchers) and every topic0 they hash to is asserted in
+# test/topics.test.ts against a REAL log fetched from chain 143.
+#
+# Note what is NOT here: no `indexed` keyword on any parameter. That is not an
+# oversight. No Kuru event indexes anything, so a log carries exactly one topic - the
+# signature - and every parameter lives in `data`. Adding `indexed` to a signature
+# here would change the topic0 Envio filters on and the indexer would match nothing.
+#
+# Note also `OrdersCanceled` - plural, with a `uint40[]`. A single cancel is still an
+# array of one, and batch cancels are common: 1,152 cancel logs over blocks
+# 101340850..101341449 carried 1,841 order ids.
+
+name: tradepro-kuru
+description: Kuru order books, fills and cancels on Monad, for tradepro /portfolio and order history.
+
+# Reorg handling. Monad's 400ms blocks mean a shallow reorg is cheap to replay and
+# expensive to serve wrong, so rollback is on.
+rollback_on_reorg: true
+
+# `transaction.hash` is not in HyperSync's default field set and every entity here
+# records the transaction it came from, so it is requested explicitly.
+field_selection:
+  transaction_fields:
+    - hash
+
+contracts:
+  - name: Router
+    handler: src/EventHandlers.ts
+    events:
+      # 12 parameters, none indexed. This is both market discovery and the only free
+      # source of a market's pricePrecision.
+      - event: MarketRegistered(address baseAsset, address quoteAsset, address market, address vaultAddress, uint32 pricePrecision, uint96 sizePrecision, uint32 tickSize, uint96 minSize, uint96 maxSize, uint256 takerFeeBps, uint256 makerFeeBps, uint96 kuruAmmSpread)
+
+  - name: OrderBook
+    handler: src/EventHandlers.ts
+    events:
+      - event: OrderCreated(uint40 orderId, address owner, uint96 size, uint32 price, bool isBuy)
+      - event: OrdersCanceled(uint40[] orderId, address owner)
+      - event: Trade(uint40 orderId, address makerAddress, bool isBuy, uint256 price, uint96 updatedSize, address takerAddress, address txOrigin, uint96 filledSize)
+
+networks:
+  - id: 143
+    # Kuru's Router was already live long before this indexer; MON_AUSD registered in
+    # block 45,440,066. Backfilling 56M blocks of order-book traffic to collect four
+    # registration events is not worth it, so the four live books are seeded from a
+    # verified getMarketParams() read (src/markets.ts) and this start_block only has
+    # to be early enough to cover the history /portfolio promises.
+    #
+    # OWNER: set this to the point you want history from before the first deploy.
+    # 101_000_000 is roughly 2026-09-01 at 400ms blocks. Lower it to widen history at
+    # the cost of a longer initial sync; HyperSync has no 100-block cap, so a wider
+    # range costs sync time, not thousands of requests.
+    start_block: 101000000
+    contracts:
+      - name: Router
+        address:
+          # Router.TRUSTED_FORWARDER() verified 2026-09-02; see core/chain/addresses.ts.
+          - 0xd651346d7c789536ebf06dc72aE3C8502cd695CC
+      - name: OrderBook
+        # The four live books. New markets are picked up at runtime by the
+        # MarketRegistered contractRegister handler, so this list is a floor, not a cap.
+        address:
+          - 0x131A2e70A5b31a517A74b8c567149bc294470Da9 # MON_AUSD
+          - 0x065C9d28E428A0db40191a54d33d5b7c71a9C394 # MON_USDC
+          - 0x699AbC15308156E9a3AB89Ec7387e9CfE1c86A3b # AUSD_USDC
+          - 0xbDC776284Bf593981b1F0237F053A7Ad11Eb596F # WBTC_AUSD
