@@ -90,9 +90,9 @@ export default function OnboardPage() {
 
   return (
     <main className="onboard">
-      <div className="wordmark logo-img" role="img" aria-label="MoneyMarkets">
-        <img className="on-light" src={`${BASE_PATH}/logo.svg`} alt="" height={26} />
-        <img className="on-dark" src={`${BASE_PATH}/logo-on-dark.svg`} alt="" height={26} />
+      <div className="wordmark">
+        <img className="logo-mark" src={`${BASE_PATH}/icon.svg`} alt="" width={26} height={26} />
+        Money<span>Markets</span>
       </div>
 
       <div>

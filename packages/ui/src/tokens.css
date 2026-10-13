@@ -1475,28 +1475,24 @@ td {
 .topbar .logo span {
   color: var(--trade);
 }
-/* The logo as an image: one file per theme, the same switch the palette uses. */
-.logo-img img {
+/* The logo mark sits before the wordmark, in the header and on the sign-in screen. */
+.logo-mark {
   display: block;
+  width: 26px;
   height: 26px;
-  width: auto;
+  margin-right: 8px;
+  flex: none;
 }
-.logo-img .on-dark {
-  display: none;
+.topbar .logo,
+.wordmark {
+  align-items: center;
 }
-[data-theme='dark'] .logo-img .on-light {
-  display: none;
+.wordmark {
+  display: flex;
+  letter-spacing: -0.03em;
 }
-[data-theme='dark'] .logo-img .on-dark {
-  display: block;
-}
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme='light']) .logo-img .on-light {
-    display: none;
-  }
-  :root:not([data-theme='light']) .logo-img .on-dark {
-    display: block;
-  }
+.wordmark span {
+  color: var(--trade);
 }
 .topbar-nav {
   display: flex;

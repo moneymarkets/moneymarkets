@@ -241,7 +241,7 @@ export function Chrome({ children }: { children: ReactNode }) {
         pathname={pathname}
         wordmark="MoneyMarkets"
         wordmarkAccent="Markets"
-        logo={{ light: `${BASE_PATH}/logo.svg`, dark: `${BASE_PATH}/logo-on-dark.svg` }}
+        mark={`${BASE_PATH}/icon.svg`}
         link={nextLink}
         status={footerStatus}
         topRight={
